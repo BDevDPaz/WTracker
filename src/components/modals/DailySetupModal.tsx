@@ -1,115 +1,137 @@
 // src/components/modals/DailySetupModal.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Modal, View, Text, StyleSheet, TextInput, Pressable, Platform, KeyboardAvoidingView } from 'react-native';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
 interface DailySetupModalProps {
   visible: boolean;
   onCancel: () => void;
-  onConfirm: (destination: string, alias: string) => void;
+  onConfirm: (destination: string, address?: string) => void;
 }
 
 export function DailySetupModal({ visible, onCancel, onConfirm }: DailySetupModalProps) {
-  const [destination, setDestination] = useState('');
-  const [alias, setAlias] = useState('');
+  const [dest, setDest] = useState('');
+  const [addr, setAddr] = useState('');
 
-  const handleConfirm = () => {
-    onConfirm(destination, alias);
-    setDestination('');
-    setAlias('');
-  };
+  // Limpieza imperativa del estado local al abrir el componente
+  useEffect(() => {
+    if (visible) { 
+      setDest(''); 
+      setAddr(''); 
+    }
+  }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={styles.overlay}
       >
-        <View style={styles.modalContent}>
-          
-          {/* Encabezado */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Iniciar jornada</Text>
-            <Text style={styles.subtitle}>Configura el destino operativo</Text>
+        {/* Fondo táctil para desestimar el modal */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+        
+        {/* Tarjeta de control físico */}
+        <Animated.View 
+          entering={SlideInDown.springify().damping(22).stiffness(250)} 
+          style={styles.modalCard}
+        >
+          <Text style={styles.title}>Iniciar Jornada</Text>
+          <Text style={styles.subtitle}>Confirma tu destino para el rastreo de zona.</Text>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Destino / Cliente</Text>
+            <TextInput 
+              style={styles.input} 
+              placeholder="Ej. Taller Central" 
+              placeholderTextColor={PALETTE.textMuted} 
+              value={dest} 
+              onChangeText={setDest} 
+              autoFocus 
+            />
           </View>
 
-          {/* Cuerpo (Inputs) */}
-          <View style={styles.body}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Destino / Dirección</Text>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Ej. 10101 Lindley Ave" 
-                placeholderTextColor={PALETTE.textMuted}
-                value={destination}
-                onChangeText={setDestination}
-              />
-            </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Alias / Cliente (Opcional)</Text>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Ej. Proyecto Norte" 
-                placeholderTextColor={PALETTE.textMuted}
-                value={alias}
-                onChangeText={setAlias}
-              />
-            </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Dirección (Opcional)</Text>
+            <TextInput 
+              style={styles.input} 
+              placeholder="Ej. 123 Main St" 
+              placeholderTextColor={PALETTE.textMuted} 
+              value={addr} 
+              onChangeText={setAddr} 
+            />
           </View>
 
-          {/* Footer (Secondary Left, Primary Right) */}
           <View style={styles.footer}>
-            <View style={styles.buttonWrapper}>
-              <Button label="Cancelar" variant="ghost" onPress={onCancel} />
-            </View>
-            <View style={styles.buttonWrapper}>
-              <Button 
-                label="Activar monitoreo" 
-                variant="primary" 
-                onPress={handleConfirm} 
-                disabled={destination.trim().length === 0} 
-              />
-            </View>
+            <Button 
+              label="Cancelar" 
+              variant="ghost" 
+              onPress={onCancel} 
+              style={{ flex: 1 }} 
+            />
+            <Button 
+              label="Iniciar" 
+              variant="primary" 
+              onPress={() => onConfirm(dest || 'Sin nombre', addr)} 
+              style={{ flex: 1 }} 
+              disabled={!dest.trim()} 
+            />
           </View>
-          
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)', // Overlay crítico oscuro[span_4](start_span)[span_4](end_span)
-    justifyContent: 'center',
-    padding: SPACING.xl,
+  overlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.6)', 
+    justifyContent: 'flex-end' 
   },
-  modalContent: {
-    backgroundColor: PALETTE.carbonMist, // Level 2 Surface[span_5](start_span)[span_5](end_span)
-    borderRadius: RADIUS.modals, // 28px[span_6](start_span)[span_6](end_span)
-    padding: SPACING.xl,
-    borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+  modalCard: { 
+    backgroundColor: PALETTE.carbonMist, 
+    borderTopLeftRadius: RADIUS.cards, 
+    borderTopRightRadius: RADIUS.cards, 
+    padding: SPACING.xl, 
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl, 
+    borderWidth: 1, 
+    borderColor: PALETTE.steelLine, 
+    borderBottomWidth: 0 
   },
-  header: { marginBottom: SPACING.xl },
-  title: { ...FONT.h2, color: PALETTE.textPrimary, marginBottom: 4 },
-  subtitle: { ...FONT.body, color: PALETTE.textSecondary },
-  body: { marginBottom: SPACING.xl },
-  inputGroup: { marginBottom: SPACING.lg },
-  inputLabel: { ...FONT.caption, color: PALETTE.textSecondary, marginBottom: 8 },
-  input: {
-    backgroundColor: PALETTE.graphite, // Level 1 Surface
-    borderRadius: RADIUS.inputs,
-    height: 52,
-    paddingHorizontal: SPACING.lg,
-    color: PALETTE.textPrimary,
-    ...FONT.body,
-    borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+  title: { 
+    ...FONT.h2, 
+    color: PALETTE.textPrimary, 
+    marginBottom: SPACING.xs 
   },
-  footer: { flexDirection: 'row', gap: SPACING.md },
-  buttonWrapper: { flex: 1 },
+  subtitle: { 
+    ...FONT.body, 
+    color: PALETTE.textSecondary, 
+    marginBottom: SPACING.xl 
+  },
+  inputGroup: { 
+    marginBottom: SPACING.lg 
+  },
+  label: { 
+    ...FONT.caption, 
+    color: PALETTE.textSecondary, 
+    marginBottom: 8 
+  },
+  input: { 
+    backgroundColor: PALETTE.graphite, 
+    borderRadius: RADIUS.inputs, 
+    height: 52, 
+    paddingHorizontal: SPACING.lg, 
+    color: PALETTE.textPrimary, 
+    ...FONT.body, 
+    borderWidth: 1, 
+    borderColor: PALETTE.steelLine 
+  },
+  footer: { 
+    flexDirection: 'row', 
+    gap: SPACING.md, 
+    marginTop: SPACING.sm 
+  },
 });
 

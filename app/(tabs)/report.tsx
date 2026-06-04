@@ -1,6 +1,7 @@
 // app/(tabs)/report.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { PALETTE, SPACING, RADIUS, FONT } from '../../src/constants/theme';
 import { DocumentPreviewWidget } from '../../src/components/ui/DocumentPreviewWidget';
 import { Button } from '../../src/components/ui/Button';
@@ -12,39 +13,32 @@ export default function ReportScreen() {
 
   // --- Estados de la Máquina del Exportador ---
   const [isExporting, setIsExporting] = useState(false);
-  const [hasGenerated, setHasGenerated] = useState(false); // Desbloquea las acciones secundarias
+  const [hasGenerated, setHasGenerated] = useState(false);
 
   // --- Simulador de Edge-Case (Fallo de Memoria) ---
   const [forceMemoryError, setForceMemoryError] = useState(false);
 
-  // Alternar el simulador de error
   const toggleErrorSimulator = () => {
     const newState = !forceMemoryError;
     setForceMemoryError(newState);
     if (newState) {
       showToast('Modo pruebas: Error de memoria ACTIVADO', 'info');
-      setHasGenerated(false); // Resetea el estado si había un documento previo
+      setHasGenerated(false);
     } else {
       showToast('Modo pruebas: Comportamiento normal restaurado', 'success');
     }
   };
 
-  // Motor de Generación Simulado
   const handleGenerateReport = () => {
     setIsExporting(true);
-    
-    // Simulamos el tiempo que tarda el motor de PDF (1.5 segundos)
     setTimeout(() => {
       setIsExporting(false);
-      
       if (forceMemoryError) {
-        // EDGE-CASE: Fallo de hardware/memoria
         showToast('Error: Memoria insuficiente para exportar PDF', 'info');
         setHasGenerated(false);
       } else {
-        // HAPPY PATH: Éxito
         showToast('Reporte oficial generado correctamente', 'success');
-        setHasGenerated(true); // Desbloquea Compartir, Email, etc.
+        setHasGenerated(true);
       }
     }, 1500); 
   };
@@ -53,11 +47,10 @@ export default function ReportScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* Encabezado con Simulador Oculto */}
-        <View style={styles.header}>
+        {/* Encabezado (Entrada suave sin rebote) */}
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
           <View style={styles.headerRow}>
             <Text style={styles.headerTitle}>Reportes</Text>
-            {/* BOTÓN OCULTO PARA SIMULAR FALLO DE MEMORIA */}
             <Pressable onPress={toggleErrorSimulator}>
               <Text style={[styles.simulatorText, forceMemoryError && { color: PALETTE.deepRed }]}>
                 {forceMemoryError ? 'SIMULAR: FALLO' : 'SIMULAR: OK'}
@@ -65,10 +58,10 @@ export default function ReportScreen() {
             </Pressable>
           </View>
           <Text style={styles.headerSubtitle}>RESUMEN SEMANAL</Text>
-        </View>
+        </Animated.View>
 
-        {/* Period Selector */}
-        <View style={styles.periodSelector}>
+        {/* Period Selector (Inicio de la Cascada - 100ms) */}
+        <Animated.View entering={FadeInDown.delay(100).springify().damping(20)} style={styles.periodSelector}>
           <Pressable style={styles.arrowButton}>
             <Ionicons name="chevron-back" size={20} color={PALETTE.textPrimary} />
           </Pressable>
@@ -79,30 +72,30 @@ export default function ReportScreen() {
           <Pressable style={styles.arrowButton}>
             <Ionicons name="chevron-forward" size={20} color={PALETTE.textSecondary} />
           </Pressable>
-        </View>
+        </Animated.View>
 
-        {/* Financial Summary Card */}
-        <View style={styles.summaryCard}>
+        {/* Financial Summary Card (200ms) */}
+        <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={styles.summaryCard}>
           <Text style={styles.summaryTopLabel}>TOTAL SEMANA</Text>
           <Text style={styles.summaryMassiveMetric}>$256.00</Text>
           <View style={styles.summarySubMetricsRow}>
             <Text style={styles.summarySubMetricText}>12.8 h  •  4 sesiones</Text>
             <Text style={styles.summaryTrailingMetric}>Overtime: $0.00</Text>
           </View>
-        </View>
+        </Animated.View>
 
-        {/* Document Preview Widget */}
-        <View style={styles.widgetWrapper}>
+        {/* Document Preview Widget (300ms) */}
+        <Animated.View entering={FadeInDown.delay(300).springify().damping(20)} style={styles.widgetWrapper}>
           <DocumentPreviewWidget 
             employeeName="Alex León"
             dateRange="Jun 01, 2026 - Jun 07, 2026"
             totalHours="12.8 h"
             totalEarnings="$256.00"
           />
-        </View>
+        </Animated.View>
 
-        {/* Breakdown Grid */}
-        <View style={styles.breakdownGrid}>
+        {/* Breakdown Grid (400ms) */}
+        <Animated.View entering={FadeInDown.delay(400).springify().damping(20)} style={styles.breakdownGrid}>
           <View style={styles.breakdownRow}><Text style={styles.breakdownKey}>Horas normales</Text><Text style={styles.breakdownValue}>12.8 h</Text></View>
           <View style={styles.breakdownRow}><Text style={styles.breakdownKey}>Overtime</Text><Text style={styles.breakdownValue}>0.0 h</Text></View>
           <View style={styles.divider} />
@@ -110,38 +103,40 @@ export default function ReportScreen() {
           <View style={styles.breakdownRow}><Text style={styles.breakdownKey}>Multiplicador OT</Text><Text style={styles.breakdownValue}>1.5x</Text></View>
           <View style={styles.divider} />
           <View style={styles.breakdownTotalRow}><Text style={styles.breakdownTotalKey}>TOTAL NETO</Text><Text style={styles.breakdownTotalValue}>$256.00</Text></View>
-        </View>
+        </Animated.View>
 
-        {/* Action Stack (Motor de Exportación Interactiva) */}
-        <View style={styles.actionStack}>
+        {/* Action Stack (500ms) */}
+        <Animated.View entering={FadeInDown.delay(500).springify().damping(20)} style={styles.actionStack}>
           <Button 
             label={isExporting ? "Generando documento..." : (hasGenerated ? "Regenerar reporte" : "Generar reporte")}
             variant="primary" 
             onPress={handleGenerateReport} 
             isLoading={isExporting}
           />
-          {/* Estos botones nacen bloqueados hasta que se genera el documento */}
           <Button 
             label="Compartir" 
             variant="secondary" 
-            onPress={() => showToast('Abriendo menú nativo de iOS/Android...', 'info')} 
+            onPress={() => showToast('Abriendo menú nativo...', 'info')} 
             disabled={isExporting || !hasGenerated}
           />
           <Button 
             label="Enviar por correo" 
             variant="secondary" 
-            onPress={() => showToast('Redirigiendo al cliente de correo...', 'info')} 
+            onPress={() => showToast('Redirigiendo al cliente...', 'info')} 
             disabled={isExporting || !hasGenerated}
           />
           <Button 
             label="Previsualizar" 
             variant="ghost" 
-            onPress={() => showToast('Abriendo visor interno de PDF...', 'info')} 
+            onPress={() => showToast('Abriendo visor interno...', 'info')} 
             disabled={isExporting || !hasGenerated}
           />
-        </View>
+        </Animated.View>
 
-        <Text style={styles.trustNote}>* Incluye horas, sesiones detalladas, notas y eventos de auditoría forense.</Text>
+        {/* Nota Final (600ms) */}
+        <Animated.Text entering={FadeInDown.delay(600).duration(400)} style={styles.trustNote}>
+          * Incluye horas, sesiones detalladas, notas y eventos de auditoría forense.
+        </Animated.Text>
 
       </ScrollView>
     </SafeAreaView>

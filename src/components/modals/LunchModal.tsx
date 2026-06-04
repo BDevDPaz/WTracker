@@ -1,101 +1,126 @@
 // src/components/modals/LunchModal.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, Pressable } from 'react-native';
+import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
 interface LunchModalProps {
   visible: boolean;
   onCancel: () => void;
-  onConfirm: (lunchMinutes: number) => void;
+  onConfirm: (minutes: number) => void;
 }
 
-const LUNCH_OPTIONS = [0, 30, 45, 60];
-
 export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
-  const [selectedLunch, setSelectedLunch] = useState<number>(30); // Default: 30 min
+  const [selected, setSelected] = useState(30);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          
-          <View style={styles.header}>
-            <Text style={styles.title}>Confirmar cierre</Text>
-            <Text style={styles.subtitle}>Selecciona el tiempo de almuerzo a deducir de esta sesión.</Text>
+        {/* Fondo táctil para desestimar el modal de forma segura */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+        
+        {/* Tarjeta interactiva con físicas de resorte */}
+        <Animated.View 
+          entering={SlideInDown.springify().damping(22).stiffness(250)} 
+          style={styles.modalCard}
+        >
+          <Text style={styles.title}>Deducción de Almuerzo</Text>
+          <Text style={styles.subtitle}>Selecciona el tiempo de descanso a descontar de la jornada actual.</Text>
+
+          {/* Fila de opciones de tiempo */}
+          <View style={styles.optionsRow}>
+            {[0, 30, 45, 60].map(min => (
+              <Pressable 
+                key={min} 
+                onPress={() => setSelected(min)} 
+                style={[styles.optionPill, selected === min && styles.optionPillActive]}
+              >
+                <Text style={[styles.optionText, selected === min && styles.optionTextActive]}>
+                  {min}m
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
-          {/* Cuerpo (Selector rápido de tiempo)[span_8](start_span)[span_8](end_span) */}
-          <View style={styles.body}>
-            <View style={styles.optionsRow}>
-              {LUNCH_OPTIONS.map((min) => {
-                const isActive = selectedLunch === min;
-                return (
-                  <Pressable
-                    key={min}
-                    style={[styles.lunchPill, isActive && styles.lunchPillActive]}
-                    onPress={() => setSelectedLunch(min)}
-                  >
-                    <Text style={[styles.lunchPillText, isActive && styles.lunchPillTextActive]}>
-                      {min} m
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
+          {/* Acciones del pie de página */}
           <View style={styles.footer}>
-            <View style={styles.buttonWrapper}>
-              <Button label="Volver" variant="ghost" onPress={onCancel} />
-            </View>
-            <View style={styles.buttonWrapper}>
-              <Button label="Cerrar jornada" variant="primary" onPress={() => onConfirm(selectedLunch)} />
-            </View>
+            <Button 
+              label="Omitir" 
+              variant="ghost" 
+              onPress={onCancel} 
+              style={{ flex: 1 }} 
+            />
+            <Button 
+              label="Confirmar" 
+              variant="primary" 
+              onConfirm={() => onConfirm(selected)} 
+              onPress={() => onConfirm(selected)} 
+              style={{ flex: 1 }} 
+            />
           </View>
-
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center',
-    padding: SPACING.xl,
+  overlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.6)', 
+    justifyContent: 'flex-end' 
   },
-  modalContent: {
-    backgroundColor: PALETTE.carbonMist,
-    borderRadius: RADIUS.modals,
-    padding: SPACING.xl,
-    borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+  modalCard: { 
+    backgroundColor: PALETTE.carbonMist, 
+    borderTopLeftRadius: RADIUS.cards, 
+    borderTopRightRadius: RADIUS.cards, 
+    padding: SPACING.xl, 
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl, 
+    borderWidth: 1, 
+    borderColor: PALETTE.steelLine, 
+    borderBottomWidth: 0 
   },
-  header: { marginBottom: SPACING.xl },
-  title: { ...FONT.h2, color: PALETTE.textPrimary, marginBottom: 4 },
-  subtitle: { ...FONT.body, color: PALETTE.textSecondary, lineHeight: 22 },
-  body: { marginBottom: SPACING.xxl },
-  optionsRow: { flexDirection: 'row', justifyContent: 'space-between', gap: SPACING.sm },
-  lunchPill: {
-    flex: 1,
-    height: 48,
-    backgroundColor: PALETTE.graphite,
-    borderRadius: RADIUS.inputs,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+  title: { 
+    ...FONT.h2, 
+    color: PALETTE.textPrimary, 
+    marginBottom: SPACING.xs 
   },
-  lunchPillActive: {
-    backgroundColor: 'rgba(197, 160, 89, 0.15)', // mutedGold con opacidad
-    borderColor: PALETTE.mutedGold,
+  subtitle: { 
+    ...FONT.body, 
+    color: PALETTE.textSecondary, 
+    marginBottom: SPACING.xl,
+    lineHeight: 22 
   },
-  lunchPillText: { ...FONT.bodyStrong, color: PALETTE.textSecondary },
-  lunchPillTextActive: { color: PALETTE.mutedGold },
-  footer: { flexDirection: 'row', gap: SPACING.md },
-  buttonWrapper: { flex: 1 },
+  optionsRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginBottom: SPACING.xl 
+  },
+  optionPill: { 
+    flex: 1, 
+    marginHorizontal: 4, 
+    paddingVertical: 14, 
+    alignItems: 'center', 
+    backgroundColor: PALETTE.graphite, 
+    borderRadius: RADIUS.inputs, 
+    borderWidth: 1, 
+    borderColor: PALETTE.steelLine 
+  },
+  optionPillActive: { 
+    backgroundColor: 'rgba(212, 175, 55, 0.1)', 
+    borderColor: PALETTE.mutedGold 
+  },
+  optionText: { 
+    ...FONT.bodyStrong, 
+    color: PALETTE.textSecondary 
+  },
+  optionTextActive: { 
+    color: PALETTE.mutedGold 
+  },
+  footer: { 
+    flexDirection: 'row', 
+    gap: SPACING.md 
+  },
 });
 

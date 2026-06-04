@@ -1,6 +1,7 @@
 // app/(tabs)/index.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, FadeInDown } from 'react-native-reanimated';
 import { PALETTE, SPACING, FONT } from '../../src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -26,18 +27,57 @@ export default function HoyScreen() {
   const [isLunchModalVisible, setIsLunchModalVisible] = useState(false);
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
 
+  // --- Animación del Efecto de Respiración (Breathing Orb) ---
+  const glowScale = useSharedValue(1);
+  const glowOpacity = useSharedValue(0.2);
+
+  // --- Lógica de Íconos Duales y Estados ---
   const getHeaderOrb = () => {
     switch (engineState) {
-      case 'NO_INICIADA': case 'CERRADA': return { icon: 'moon' as const, color: PALETTE.textSecondary, glow: false };
-      case 'ESPERANDO_LLEGADA': return { icon: 'pin' as const, color: PALETTE.slateBlue, glow: false };
-      case 'ASINCRONIA_CHECKIN': case 'SALIDA_DETECTADA': return { icon: 'alert' as const, color: PALETTE.amberWarning, glow: true };
-      case 'NO_SHOW': return { icon: 'warning' as const, color: PALETTE.deepRed, glow: true };
-      case 'EN_TRASLADO': case 'ACTIVA': return { icon: 'location' as const, color: PALETTE.mutedGold, glow: true };
-      default: return { icon: 'moon' as const, color: PALETTE.textSecondary, glow: false };
+      case 'NO_INICIADA': case 'CERRADA': 
+        return { icon: 'moon-outline' as const, color: PALETTE.textSecondary, glow: false };
+      case 'ESPERANDO_LLEGADA': 
+        return { icon: 'pin-outline' as const, color: PALETTE.slateBlue, glow: false };
+      case 'ASINCRONIA_CHECKIN': case 'SALIDA_DETECTADA': 
+        return { icon: 'alert-circle-outline' as const, color: PALETTE.amberWarning, glow: true };
+      case 'NO_SHOW': 
+        return { icon: 'warning' as const, color: PALETTE.deepRed, glow: true };
+      case 'EN_TRASLADO': 
+        return { icon: 'location-outline' as const, color: PALETTE.mutedGold, glow: true };
+      case 'ACTIVA': 
+        return { icon: 'location' as const, color: PALETTE.mutedGold, glow: true };
+      default: 
+        return { icon: 'moon-outline' as const, color: PALETTE.textSecondary, glow: false };
     }
   };
 
   const orb = getHeaderOrb();
+
+  // Control del motor de animación Reanimated
+  useEffect(() => {
+    if (orb.glow) {
+      // Ciclo infinito de expansión y contracción fluida
+      glowScale.value = withRepeat(
+        withTiming(1.15, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true
+      );
+      glowOpacity.value = withRepeat(
+        withTiming(0.6, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true
+      );
+    } else {
+      // Retorno suave al estado de reposo
+      glowScale.value = withTiming(1, { duration: 500 });
+      glowOpacity.value = withTiming(0, { duration: 500 });
+    }
+  }, [orb.glow, engineState]);
+
+  const animatedOrbStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: glowScale.value }],
+    shadowOpacity: glowOpacity.value,
+  }));
 
   // --- Ciclo de Prueba ---
   const handlePrimaryMockAction = () => {
@@ -65,19 +105,23 @@ export default function HoyScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* Encabezado */}
-        <View style={styles.header}>
+        {/* Encabezado con Breathing Orb Animado (Entrada inicial) */}
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>W Tracker</Text>
             <Text style={styles.headerSubtitle}>CONTROL DIARIO</Text>
           </View>
-          <View style={[styles.statusOrb, orb.glow && { shadowColor: orb.color, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 }]}>
+          <Animated.View style={[
+            styles.statusOrb, 
+            orb.glow && { shadowColor: orb.color, shadowRadius: 10, elevation: 6 },
+            animatedOrbStyle
+          ]}>
             <Ionicons name={orb.icon} size={20} color={orb.color} />
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
 
-        {/* Tarjeta Principal */}
-        <View style={styles.heroWrapper}>
+        {/* Tarjeta Principal (Base de la cascada) */}
+        <Animated.View entering={FadeInDown.delay(50).springify().damping(20)} style={styles.heroWrapper}>
           <OperationalHeroCard 
             state={engineState}
             destination={currentDestination || undefined}
@@ -86,7 +130,7 @@ export default function HoyScreen() {
             onPrimaryAction={handlePrimaryMockAction}
             onSecondaryAction={handleSecondaryMockAction}
           />
-        </View>
+        </Animated.View>
 
         {/* --- COMPONENTES EXTRAÍDOS --- */}
         <DailySummaryBlock 
@@ -101,15 +145,27 @@ export default function HoyScreen() {
       </ScrollView>
 
       {/* --- MODALES --- */}
-      <DailySetupModal visible={isSetupModalVisible} onCancel={() => setIsSetupModalVisible(false)} onConfirm={(d, a) => { setIsSetupModalVisible(false); setCurrentDestination(a ? `${a} - ${d}` : d); setEngineState('ESPERANDO_LLEGADA'); showToast('Monitoreo protegido activado', 'success'); }} />
-      <LunchModal visible={isLunchModalVisible} onCancel={() => setIsLunchModalVisible(false)} onConfirm={(min) => { setIsLunchModalVisible(false); setEngineState('CERRADA'); showToast(`Jornada cerrada. ${min} min deducidos`, 'success'); }} />
-      <ExitDetectionModal visible={isExitModalVisible} exitTime="04:30 PM" onContinueOperating={() => { setIsExitModalVisible(false); setEngineState('ACTIVA'); showToast('Operación restaurada', 'success'); }} onCloseShift={() => { setIsExitModalVisible(false); setIsLunchModalVisible(true); }} />
+      <DailySetupModal 
+        visible={isSetupModalVisible} 
+        onCancel={() => setIsSetupModalVisible(false)} 
+        onConfirm={(d, a) => { setIsSetupModalVisible(false); setCurrentDestination(a ? `${a} - ${d}` : d); setEngineState('ESPERANDO_LLEGADA'); showToast('Monitoreo protegido activado', 'success'); }} 
+      />
+      <LunchModal 
+        visible={isLunchModalVisible} 
+        onCancel={() => setIsLunchModalVisible(false)} 
+        onConfirm={(min) => { setIsLunchModalVisible(false); setEngineState('CERRADA'); showToast(`Jornada cerrada. ${min} min deducidos`, 'success'); }} 
+      />
+      <ExitDetectionModal 
+        visible={isExitModalVisible} 
+        exitTime="04:30 PM" 
+        onContinueOperating={() => { setIsExitModalVisible(false); setEngineState('ACTIVA'); showToast('Operación restaurada', 'success'); }} 
+        onCloseShift={() => { setIsExitModalVisible(false); setIsLunchModalVisible(true); }} 
+      />
 
     </SafeAreaView>
   );
 }
 
-// Los estilos ahora son mínimos, solo posicionan los contenedores
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: PALETTE.obsidian },
   scrollContent: { paddingBottom: 40 },

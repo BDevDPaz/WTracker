@@ -1,9 +1,10 @@
 // src/components/modals/DeleteSessionModal.tsx
 import React from 'react';
-import { View, Text, StyleSheet, Modal } from 'react-native';
+import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
+import Animated, { SlideInDown } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
-import { Ionicons } from '@expo/vector-icons';
 
 interface DeleteSessionModalProps {
   visible: boolean;
@@ -13,31 +14,42 @@ interface DeleteSessionModalProps {
 
 export function DeleteSessionModal({ visible, onCancel, onConfirm }: DeleteSessionModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          
-          <View style={styles.iconCircle}>
-            <Ionicons name="trash" size={32} color={PALETTE.deepRed} />
+        {/* Fondo táctil seguro para descartar la acción destructiva */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+
+        {/* Tarjeta de confirmación con físicas de resorte */}
+        <Animated.View
+          entering={SlideInDown.springify().damping(22).stiffness(250)}
+          style={styles.modalCard}
+        >
+          <View style={styles.alertHeader}>
+            <View style={styles.iconWrapper}>
+              <Ionicons name="trash-bin" size={24} color={PALETTE.deepRed} />
+            </View>
+            <Text style={styles.title}>Eliminar Registro</Text>
           </View>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>Eliminar registro</Text>
-            <Text style={styles.subtitle}>
-              ¿Deseas eliminar esta sesión? Esta acción no se puede deshacer.
-            </Text>
-          </View>
+          <Text style={styles.subtitle}>
+            Esta acción es completamente irreversible y destructiva. Se borrarán permanentemente de la base de datos local todos los eventos de geolocalización, marcas de tiempo y cálculos financieros de esta sesión.
+          </Text>
 
           <View style={styles.footer}>
-            <View style={styles.buttonWrapper}>
-              <Button label="Cancelar" variant="ghost" onPress={onCancel} />
-            </View>
-            <View style={styles.buttonWrapper}>
-              <Button label="Eliminar" variant="danger" onPress={onConfirm} />
-            </View>
+            <Button
+              label="Cancelar"
+              variant="ghost"
+              onPress={onCancel}
+              style={{ flex: 1 }}
+            />
+            <Button
+              label="Eliminar"
+              variant="danger"
+              onPress={onConfirm}
+              style={{ flex: 1 }}
+            />
           </View>
-
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -46,31 +58,46 @@ export function DeleteSessionModal({ visible, onCancel, onConfirm }: DeleteSessi
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center',
-    padding: SPACING.xl,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
   },
-  modalContent: {
-    backgroundColor: PALETTE.carbonMist, // Level 2 Surface
-    borderRadius: RADIUS.modals,
+  modalCard: {
+    backgroundColor: PALETTE.carbonMist,
+    borderTopLeftRadius: RADIUS.cards,
+    borderTopRightRadius: RADIUS.cards,
     padding: SPACING.xl,
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.deepRed, // Borde de peligro
+    borderColor: PALETTE.steelLine,
+    borderBottomWidth: 0,
   },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(198, 40, 40, 0.1)', // deepRed con opacidad
+  alertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  iconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(235, 87, 87, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.lg,
-    alignSelf: 'center',
   },
-  header: { marginBottom: SPACING.xl, alignItems: 'center' },
-  title: { fontSize: 26, fontWeight: '700', color: PALETTE.textPrimary, marginBottom: 8, textAlign: 'center' },
-  subtitle: { ...FONT.body, color: PALETTE.textSecondary, textAlign: 'center', lineHeight: 22 },
-  footer: { flexDirection: 'row', gap: SPACING.md },
-  buttonWrapper: { flex: 1 },
+  title: {
+    ...FONT.h2,
+    color: PALETTE.textPrimary,
+  },
+  subtitle: {
+    ...FONT.body,
+    color: PALETTE.textSecondary,
+    marginBottom: SPACING.xl,
+    lineHeight: 22,
+  },
+  footer: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
 });
 

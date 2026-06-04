@@ -1,9 +1,10 @@
 // src/components/modals/ExitDetectionModal.tsx
 import React from 'react';
-import { View, Text, StyleSheet, Modal } from 'react-native';
+import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
+import Animated, { SlideInDown } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
-import { Ionicons } from '@expo/vector-icons';
 
 interface ExitDetectionModalProps {
   visible: boolean;
@@ -12,35 +13,50 @@ interface ExitDetectionModalProps {
   onCloseShift: () => void;
 }
 
-export function ExitDetectionModal({ visible, exitTime, onContinueOperating, onCloseShift }: ExitDetectionModalProps) {
+export function ExitDetectionModal({
+  visible,
+  exitTime,
+  onContinueOperating,
+  onCloseShift,
+}: ExitDetectionModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onContinueOperating}>
       <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          
-          <View style={styles.iconCircle}>
-            <Ionicons name="warning" size={32} color={PALETTE.amberWarning} />
+        {/* Fondo táctil seguro para descartar asumiendo continuación de la jornada */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={onContinueOperating} />
+
+        {/* Tarjeta de control de anomalías con físicas de resorte */}
+        <Animated.View
+          entering={SlideInDown.springify().damping(22).stiffness(250)}
+          style={styles.modalCard}
+        >
+          <View style={styles.alertHeader}>
+            <View style={styles.iconWrapper}>
+              <Ionicons name="alert-triangle" size={24} color={PALETTE.amberWarning} />
+            </View>
+            <Text style={styles.title}>Salida Detectada</Text>
           </View>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>Salida detectada</Text>
-            <Text style={styles.subtitle}>
-              El sistema registró una salida de la zona activa a las {exitTime}. ¿Deseas cerrar tu jornada ahora?
-            </Text>
-          </View>
+          <Text style={styles.subtitle}>
+            El motor geo-fence detectó un abandono de la zona protegida a las{' '}
+            <Text style={styles.timeHighlight}>{exitTime}</Text>. ¿Deseas mantener la sesión activa o cerrar la jornada laboral?
+          </Text>
 
           <View style={styles.footer}>
-            <View style={styles.buttonWrapper}>
-              {/* Acción Secundaria Fuerte: Sigo en operación[span_10](start_span)[span_10](end_span) */}
-              <Button label="Sigo en operación" variant="ghost" onPress={onContinueOperating} />
-            </View>
-            <View style={styles.buttonWrapper}>
-              {/* Acción Primaria Destructiva: Cerrar ahora[span_11](start_span)[span_11](end_span) */}
-              <Button label="Cerrar ahora" variant="danger" onPress={onCloseShift} />
-            </View>
+            <Button
+              label="Cerrar Jornada"
+              variant="secondary"
+              onPress={onCloseShift}
+              style={{ flex: 1 }}
+            />
+            <Button
+              label="Continuar"
+              variant="primary"
+              onPress={onContinueOperating}
+              style={{ flex: 1 }}
+            />
           </View>
-
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -49,31 +65,50 @@ export function ExitDetectionModal({ visible, exitTime, onContinueOperating, onC
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center',
-    padding: SPACING.xl,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
   },
-  modalContent: {
+  modalCard: {
     backgroundColor: PALETTE.carbonMist,
-    borderRadius: RADIUS.modals,
+    borderTopLeftRadius: RADIUS.cards,
+    borderTopRightRadius: RADIUS.cards,
     padding: SPACING.xl,
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.amberWarning, // Borde de advertencia para este caso crítico
+    borderColor: PALETTE.steelLine,
+    borderBottomWidth: 0,
   },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(245, 124, 0, 0.1)', // amberWarning opaco
+  alertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  iconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(242, 153, 74, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.lg,
-    alignSelf: 'center',
   },
-  header: { marginBottom: SPACING.xl, alignItems: 'center' },
-  title: { ...FONT.h2, color: PALETTE.textPrimary, marginBottom: 8, textAlign: 'center' },
-  subtitle: { ...FONT.body, color: PALETTE.textSecondary, textAlign: 'center', lineHeight: 22 },
-  footer: { flexDirection: 'column', gap: SPACING.md }, // Stack vertical por la longitud del texto
-  buttonWrapper: { width: '100%' },
+  title: {
+    ...FONT.h2,
+    color: PALETTE.textPrimary,
+  },
+  subtitle: {
+    ...FONT.body,
+    color: PALETTE.textSecondary,
+    marginBottom: SPACING.xl,
+    lineHeight: 22,
+  },
+  timeHighlight: {
+    ...FONT.bodyStrong,
+    color: PALETTE.amberWarning,
+  },
+  footer: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
 });
 

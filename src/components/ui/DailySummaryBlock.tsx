@@ -1,6 +1,7 @@
 // src/components/ui/DailySummaryBlock.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 
 interface DailySummaryBlockProps {
@@ -10,30 +11,53 @@ interface DailySummaryBlockProps {
 
 export function DailySummaryBlock({ hours, earnings }: DailySummaryBlockProps) {
   return (
-    <View style={styles.summaryBlock}>
-      <View style={styles.summaryCard}>
-        <View>
-          <Text style={styles.summaryLabel}>HORAS</Text>
-          <Text style={styles.summarySubLabel}>hoy</Text>
-        </View>
-        <Text style={styles.summaryValue}>{hours}</Text>
+    <Animated.View 
+      entering={FadeInDown.delay(100).springify().damping(20)} 
+      style={styles.block}
+    >
+      <View style={styles.metricZone}>
+        <Text style={styles.metricLabel}>Horas Registradas</Text>
+        <Text style={styles.metricValue}>{hours}</Text>
       </View>
-      <View style={styles.summaryCard}>
-        <View>
-          <Text style={styles.summaryLabel}>INGRESO</Text>
-          <Text style={styles.summarySubLabel}>estimado</Text>
-        </View>
-        <Text style={[styles.summaryValue, { color: PALETTE.mutedGold }]}>{earnings}</Text>
+      <View style={styles.divider} />
+      <View style={styles.metricZone}>
+        <Text style={styles.metricLabel}>Estimado Bruto</Text>
+        <Text style={[styles.metricValue, { color: PALETTE.mutedGold }]}>{earnings}</Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  summaryBlock: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: SPACING.xl, marginBottom: SPACING.lg, gap: SPACING.md },
-  summaryCard: { flex: 1, height: 110, borderRadius: 22, padding: SPACING.lg, backgroundColor: PALETTE.graphite, justifyContent: 'space-between' },
-  summaryLabel: { ...FONT.label, color: PALETTE.textSecondary },
-  summarySubLabel: { fontSize: 12, color: PALETTE.textMuted, marginTop: -2 },
-  summaryValue: { fontSize: 28, fontWeight: '700', color: PALETTE.textPrimary },
+  block: { 
+    flexDirection: 'row', 
+    marginHorizontal: SPACING.xl, 
+    padding: 18, 
+    borderRadius: RADIUS.cards, 
+    backgroundColor: PALETTE.graphite, 
+    marginBottom: SPACING.xl, 
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: PALETTE.steelLine
+  },
+  metricZone: { 
+    flex: 1, 
+    alignItems: 'center' 
+  },
+  metricLabel: { 
+    ...FONT.caption, 
+    color: PALETTE.textSecondary, 
+    marginBottom: 4 
+  },
+  metricValue: { 
+    fontSize: 24, 
+    fontWeight: '700', 
+    color: PALETTE.textPrimary 
+  },
+  divider: { 
+    width: 1, 
+    height: 40, 
+    backgroundColor: PALETTE.steelLine 
+  },
 });
 

@@ -1,147 +1,175 @@
 // src/components/ui/DocumentPreviewWidget.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { PALETTE, RADIUS, SPACING } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { PALETTE, RADIUS, SPACING, FONT } from '../../constants/theme';
 
 interface DocumentPreviewWidgetProps {
+  employeeName: string;
   dateRange: string;
   totalHours: string;
   totalEarnings: string;
-  employeeName?: string;
 }
 
-export function DocumentPreviewWidget({
-  dateRange,
-  totalHours,
-  totalEarnings,
-  employeeName = 'W Tracker Profile',
+export function DocumentPreviewWidget({ 
+  employeeName, 
+  dateRange, 
+  totalHours, 
+  totalEarnings 
 }: DocumentPreviewWidgetProps) {
   return (
-    <View style={styles.paperContainer}>
-      {/* Header del Documento Simulado */}
+    <View style={styles.container}>
+      {/* Etiqueta Superior */}
       <View style={styles.docHeader}>
-        <View style={styles.brandingRow}>
-          <Ionicons name="flash" size={16} color="#000000" />
-          <Text style={styles.brandText}>W TRACKER</Text>
-        </View>
-        <Text style={styles.docType}>Reporte Oficial</Text>
+        <Ionicons name="document-text" size={14} color={PALETTE.mutedGold} />
+        <Text style={styles.docHeaderText}>PREVISUALIZACIÓN DE REPORTE</Text>
       </View>
 
-      {/* Bloque de Datos */}
-      <View style={styles.dataBlock}>
-        <Text style={styles.employeeName}>{employeeName}</Text>
-        <Text style={styles.dateRange}>{dateRange}</Text>
-        
-        <View style={styles.totalsRow}>
+      {/* Papel Físico Simulado */}
+      <View style={styles.paper}>
+        <View style={styles.paperHeaderRow}>
+          <Text style={styles.companyName}>Switch to LED Electrical Services</Text>
+          <Text style={styles.docType}>REPORTE SEMANAL</Text>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.detailsRow}>
           <View>
-            <Text style={styles.metricLabel}>Total Horas</Text>
-            <Text style={styles.metricValue}>{totalHours}</Text>
+            <Text style={styles.label}>Técnico</Text>
+            <Text style={styles.value}>{employeeName}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={styles.metricLabel}>Ingreso Neto</Text>
-            <Text style={styles.metricValue}>{totalEarnings}</Text>
+            <Text style={styles.label}>Periodo</Text>
+            <Text style={styles.value}>{dateRange}</Text>
           </View>
         </View>
-      </View>
 
-      {/* Mock Lines (Simulación de Tablas del PDF) */}
-      <View style={styles.mockTable}>
-        <View style={styles.mockHeaderRow} />
-        <View style={[styles.mockRow, { width: '100%' }]} />
-        <View style={[styles.mockRow, { width: '85%' }]} />
-        <View style={[styles.mockRow, { width: '92%' }]} />
-        <View style={[styles.mockRow, { width: '70%' }]} />
+        {/* Skeleton Rows (Simulación algorítmica de renglones de sesión) */}
+        <View style={styles.skeletonContainer}>
+          {[1, 2, 3, 4].map(i => (
+            <View key={i} style={styles.skeletonRow}>
+              <View style={styles.skeletonBarLong} />
+              <View style={styles.skeletonBarShort} />
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.totalsRow}>
+          <Text style={styles.totalLabel}>TOTAL HORAS: {totalHours}</Text>
+          <Text style={styles.totalValue}>{totalEarnings}</Text>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  paperContainer: {
+  container: {
     marginHorizontal: SPACING.xl,
-    padding: 24,
-    borderRadius: RADIUS.cards,
-    backgroundColor: '#FAFAFA', // Blanco roto para simular papel
-    minHeight: 220,
-    // Sombra para darle elevación sobre el fondo oscuro
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    alignItems: 'center',
   },
   docHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    paddingBottom: SPACING.md,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
+    gap: 6,
   },
-  brandingRow: {
+  docHeaderText: {
+    ...FONT.label,
+    color: PALETTE.textSecondary,
+  },
+  paper: {
+    width: '100%',
+    backgroundColor: '#EAECEE', // Intencionalmente claro para contraste de "Documento Físico"
+    borderRadius: RADIUS.inputs,
+    padding: SPACING.lg,
+    // Elevación y sombra densa para separar la hoja del fondo oscuro
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  paperHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
   },
-  brandText: {
-    fontSize: 12,
+  companyName: {
+    fontSize: 11,
     fontWeight: '800',
-    letterSpacing: 1,
-    color: '#000000',
+    color: '#1A1A1A',
+    width: '60%',
   },
   docType: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#757575',
-    textTransform: 'uppercase',
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#666666',
+    letterSpacing: 1,
   },
-  dataBlock: {
-    marginBottom: SPACING.xl,
+  divider: {
+    height: 1,
+    backgroundColor: '#CCCCCC',
+    marginVertical: SPACING.md,
   },
-  employeeName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#212121',
-  },
-  dateRange: {
-    fontSize: 12,
-    color: '#757575',
+  detailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: SPACING.md,
+  },
+  label: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#888888',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  value: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#333333',
+  },
+  skeletonContainer: {
+    gap: 10,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  skeletonBarLong: {
+    height: 5,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 3,
+    width: '65%',
+  },
+  skeletonBarShort: {
+    height: 5,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 3,
+    width: '20%',
   },
   totalsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#F5F5F5',
-    padding: SPACING.md,
-    borderRadius: RADIUS.inputs,
+    alignItems: 'center',
   },
-  metricLabel: {
-    fontSize: 10,
-    textTransform: 'uppercase',
-    color: '#757575',
-    fontWeight: '700',
-  },
-  metricValue: {
-    fontSize: 16,
+  totalLabel: {
+    fontSize: 11,
     fontWeight: '800',
-    color: '#000000',
+    color: '#666666',
   },
-  mockTable: {
-    gap: 8,
-  },
-  mockHeaderRow: {
-    height: 6,
-    backgroundColor: '#BDBDBD',
-    borderRadius: 3,
-    width: '100%',
-    marginBottom: 4,
-  },
-  mockRow: {
-    height: 4,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 2,
+  totalValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    letterSpacing: -0.5,
   },
 });
 
