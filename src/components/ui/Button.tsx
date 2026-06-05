@@ -1,55 +1,79 @@
 // src/components/ui/Button.tsx
 import React from 'react';
-import { Text, StyleSheet, Pressable, PressableProps, ActivityIndicator, Platform } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import {
+  Text,
+  StyleSheet,
+  Pressable,
+  PressableProps,
+  ActivityIndicator,
+  Platform,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { PALETTE, RADIUS, FONT } from '../../constants/theme';
 
-interface ButtonProps extends PressableProps {
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+
+interface ButtonProps extends Omit<PressableProps, 'style'> {
   label: string;
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: ButtonVariant;
   isLoading?: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function Button({ 
-  label, 
-  variant = 'primary', 
-  isLoading = false, 
-  style, 
-  onPress, 
-  disabled, 
-  ...props 
+export function Button({
+  label,
+  variant = 'primary',
+  isLoading = false,
+  style,
+  onPress,
+  disabled = false,
+  onPressIn,
+  onPressOut,
+  ...props
 }: ButtonProps) {
-  
   const scale = useSharedValue(1);
+  const isDisabled = disabled || isLoading;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePressIn = (e: any) => {
-    scale.value = withSpring(0.96, { damping: 20, stiffness: 300 });
-    
-    // Feedback háptico ligero al contacto inicial (Protección Web)
-    if (!disabled && !isLoading && Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handlePressIn = (event: Parameters<NonNullable<PressableProps['onPressIn']>>[0]) => {
+    if (!isDisabled) {
+      scale.value = withSpring(0.96, { damping: 20, stiffness: 300 });
+
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
     }
-    
-    if (props.onPressIn) props.onPressIn(e);
+
+    if (onPressIn) {
+      onPressIn(event);
+    }
   };
 
-  const handlePressOut = (e: any) => {
+  const handlePressOut = (event: Parameters<NonNullable<PressableProps['onPressOut']>>[0]) => {
     scale.value = withSpring(1, { damping: 20, stiffness: 300 });
-    
-    if (props.onPressOut) props.onPressOut(e);
+
+    if (onPressOut) {
+      onPressOut(event);
+    }
   };
 
-  const handlePress = (e: any) => {
-    if (disabled || isLoading) return;
-    
-    // Feedback háptico de ejecución según severidad
+  const handlePress = (event: Parameters<NonNullable<PressableProps['onPress']>>[0]) => {
+    if (isDisabled) {
+      return;
+    }
+
     if (Platform.OS !== 'web') {
       if (variant === 'danger') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -57,44 +81,70 @@ export function Button({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
     }
-    
-    if (onPress) onPress(e);
+
+    if (onPress) {
+      onPress(event);
+    }
   };
 
   const getVariantStyles = () => {
     switch (variant) {
-      case 'primary': 
-        return { bg: PALETTE.mutedGold, text: PALETTE.obsidian, border: PALETTE.mutedGold };
-      case 'secondary': 
-        return { bg: 'transparent', text: PALETTE.textPrimary, border: PALETTE.steelLine };
-      case 'danger': 
-        return { bg: PALETTE.deepRed, text: '#FFF', border: PALETTE.deepRed };
-      case 'ghost': 
-        return { bg: 'transparent', text: PALETTE.textSecondary, border: 'transparent' };
+      case 'primary':
+        return {
+          backgroundColor: PALETTE.mutedGold,
+          textColor: PALETTE.obsidian,
+          borderColor: PALETTE.mutedGold,
+        };
+
+      case 'secondary':
+        return {
+          backgroundColor: 'transparent',
+          textColor: PALETTE.textPrimary,
+          borderColor: PALETTE.steelLine,
+        };
+
+      case 'danger':
+        return {
+          backgroundColor: PALETTE.deepRed,
+          textColor: '#FFFFFF',
+          borderColor: PALETTE.deepRed,
+        };
+
+      case 'ghost':
+      default:
+        return {
+          backgroundColor: 'transparent',
+          textColor: PALETTE.textSecondary,
+          borderColor: 'transparent',
+        };
     }
   };
 
-  const vStyles = getVariantStyles();
+  const variantStyles = getVariantStyles();
 
   return (
     <AnimatedPressable
+      {...props}
+      disabled={isDisabled}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={handlePress}
-      disabled={disabled || isLoading}
+      accessibilityRole="button"
       style={[
         styles.button,
-        { backgroundColor: vStyles.bg, borderColor: vStyles.border },
-        (disabled || isLoading) && styles.disabled,
+        {
+          backgroundColor: variantStyles.backgroundColor,
+          borderColor: variantStyles.borderColor,
+        },
+        isDisabled && styles.disabled,
         style,
-        animatedStyle
+        animatedStyle,
       ]}
-      {...props}
     >
       {isLoading ? (
-        <ActivityIndicator color={vStyles.text} />
+        <ActivityIndicator color={variantStyles.textColor} />
       ) : (
-        <Text style={[styles.label, { color: vStyles.text }]}>{label}</Text>
+        <Text style={[styles.label, { color: variantStyles.textColor }]}>{label}</Text>
       )}
     </AnimatedPressable>
   );

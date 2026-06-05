@@ -4,6 +4,7 @@ import { Text, StyleSheet } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 import { PALETTE, RADIUS, FONT } from '../../constants/theme';
 
+// 1. Asegúrate de que tenga "export" aquí
 export type PillStatus = 'idle' | 'pending' | 'active' | 'warning' | 'error' | 'closed';
 
 interface StatusPillProps {
@@ -11,6 +12,7 @@ interface StatusPillProps {
   label: string;
 }
 
+// 2. Asegúrate de que tenga "export" aquí también
 export function StatusPill({ status, label }: StatusPillProps) {
   const getStyles = () => {
     switch (status) {

@@ -34,27 +34,17 @@ export function OperationalHeroCard({
   onSecondaryAction,
 }: OperationalHeroCardProps) {
   
-  // Diccionario de configuración dictado por la Máquina de Estados
   const getStateConfig = () => {
     switch (state) {
-      case 'NO_INICIADA':
-        return { pillState: 'idle' as PillStatus, pillLabel: 'INACTIVO', primaryLabel: 'Iniciar Jornada', primaryVariant: 'primary' as const, secondaryLabel: null };
-      case 'ESPERANDO_LLEGADA':
-        return { pillState: 'pending' as PillStatus, pillLabel: 'ESPERANDO LLEGADA', primaryLabel: 'Forzar Llegada', primaryVariant: 'primary' as const, secondaryLabel: null };
-      case 'ASINCRONIA_CHECKIN':
-        return { pillState: 'warning' as PillStatus, pillLabel: 'ASINCRONÍA GPS', primaryLabel: 'Declarar Llegada', primaryVariant: 'danger' as const, secondaryLabel: 'Ver Detalles' };
-      case 'NO_SHOW':
-        return { pillState: 'error' as PillStatus, pillLabel: 'NO SHOW DETECTADO', primaryLabel: 'Forzar Inicio', primaryVariant: 'danger' as const, secondaryLabel: 'Abortar Sesión' };
-      case 'EN_TRASLADO':
-        return { pillState: 'active' as PillStatus, pillLabel: 'EN TRASLADO', primaryLabel: 'Confirmar Llegada', primaryVariant: 'primary' as const, secondaryLabel: null };
-      case 'ACTIVA':
-        return { pillState: 'active' as PillStatus, pillLabel: 'JORNADA ACTIVA', primaryLabel: 'Cerrar Jornada', primaryVariant: 'primary' as const, secondaryLabel: 'Añadir Nota' };
-      case 'SALIDA_DETECTADA':
-        return { pillState: 'warning' as PillStatus, pillLabel: 'SALIDA DETECTADA', primaryLabel: 'Resolver Alerta', primaryVariant: 'primary' as const, secondaryLabel: 'Cerrar Ahora' };
-      case 'CERRADA':
-        return { pillState: 'closed' as PillStatus, pillLabel: 'JORNADA CERRADA', primaryLabel: 'Nueva Jornada', primaryVariant: 'primary' as const, secondaryLabel: 'Ajustar Registro' };
-      default:
-        return { pillState: 'idle' as PillStatus, pillLabel: 'INACTIVO', primaryLabel: 'Iniciar', primaryVariant: 'primary' as const, secondaryLabel: null };
+      case 'NO_INICIADA': return { pillState: 'idle' as PillStatus, pillLabel: 'INACTIVO', primaryLabel: 'Iniciar Jornada', primaryVariant: 'primary' as const, secondaryLabel: null };
+      case 'ESPERANDO_LLEGADA': return { pillState: 'pending' as PillStatus, pillLabel: 'ESPERANDO LLEGADA', primaryLabel: 'Forzar Llegada', primaryVariant: 'primary' as const, secondaryLabel: null };
+      case 'ASINCRONIA_CHECKIN': return { pillState: 'warning' as PillStatus, pillLabel: 'ASINCRONÍA GPS', primaryLabel: 'Declarar Llegada', primaryVariant: 'danger' as const, secondaryLabel: 'Ver Detalles' };
+      case 'NO_SHOW': return { pillState: 'error' as PillStatus, pillLabel: 'NO SHOW DETECTADO', primaryLabel: 'Forzar Inicio', primaryVariant: 'danger' as const, secondaryLabel: 'Abortar Sesión' };
+      case 'EN_TRASLADO': return { pillState: 'active' as PillStatus, pillLabel: 'EN TRASLADO', primaryLabel: 'Confirmar Llegada', primaryVariant: 'primary' as const, secondaryLabel: null };
+      case 'ACTIVA': return { pillState: 'active' as PillStatus, pillLabel: 'JORNADA ACTIVA', primaryLabel: 'Cerrar Jornada', primaryVariant: 'primary' as const, secondaryLabel: 'Añadir Nota' };
+      case 'SALIDA_DETECTADA': return { pillState: 'warning' as PillStatus, pillLabel: 'SALIDA DETECTADA', primaryLabel: 'Resolver Alerta', primaryVariant: 'primary' as const, secondaryLabel: 'Cerrar Ahora' };
+      case 'CERRADA': return { pillState: 'closed' as PillStatus, pillLabel: 'JORNADA CERRADA', primaryLabel: 'Nueva Jornada', primaryVariant: 'primary' as const, secondaryLabel: 'Ajustar Registro' };
+      default: return { pillState: 'idle' as PillStatus, pillLabel: 'INACTIVO', primaryLabel: 'Iniciar', primaryVariant: 'primary' as const, secondaryLabel: null };
     }
   };
 

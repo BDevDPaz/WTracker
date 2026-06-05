@@ -1,7 +1,7 @@
 // src/components/modals/ExitDetectionModal.tsx
 import React from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
-import Animated, { SlideInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
@@ -20,26 +20,32 @@ export function ExitDetectionModal({
   onCloseShift,
 }: ExitDetectionModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onContinueOperating}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onContinueOperating}
+    >
       <View style={styles.overlay}>
-        {/* Fondo táctil seguro para descartar asumiendo continuación de la jornada */}
         <Pressable style={StyleSheet.absoluteFill} onPress={onContinueOperating} />
 
-        {/* Tarjeta de control de anomalías con físicas de resorte */}
-        <Animated.View
-          entering={SlideInDown.springify().damping(22).stiffness(250)}
-          style={styles.modalCard}
-        >
+        <Animated.View entering={FadeInDown.duration(220)} style={styles.modalCard}>
           <View style={styles.alertHeader}>
             <View style={styles.iconWrapper}>
-              <Ionicons name="alert-triangle" size={24} color={PALETTE.amberWarning} />
+              <Ionicons
+                name="warning"
+                size={24}
+                color={PALETTE.amberWarning}
+              />
             </View>
             <Text style={styles.title}>Salida Detectada</Text>
           </View>
 
           <Text style={styles.subtitle}>
             El motor geo-fence detectó un abandono de la zona protegida a las{' '}
-            <Text style={styles.timeHighlight}>{exitTime}</Text>. ¿Deseas mantener la sesión activa o cerrar la jornada laboral?
+            <Text style={styles.timeHighlight}>{exitTime}</Text>. ¿Deseas mantener
+            la sesión activa o cerrar la jornada laboral?
           </Text>
 
           <View style={styles.footer}>
@@ -49,6 +55,7 @@ export function ExitDetectionModal({
               onPress={onCloseShift}
               style={{ flex: 1 }}
             />
+
             <Button
               label="Continuar"
               variant="primary"
@@ -68,6 +75,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
+
   modalCard: {
     backgroundColor: PALETTE.carbonMist,
     borderTopLeftRadius: RADIUS.cards,
@@ -78,12 +86,14 @@ const styles = StyleSheet.create({
     borderColor: PALETTE.steelLine,
     borderBottomWidth: 0,
   },
+
   alertHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
     marginBottom: SPACING.md,
   },
+
   iconWrapper: {
     width: 44,
     height: 44,
@@ -92,20 +102,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   title: {
     ...FONT.h2,
     color: PALETTE.textPrimary,
   },
+
   subtitle: {
     ...FONT.body,
     color: PALETTE.textSecondary,
     marginBottom: SPACING.xl,
     lineHeight: 22,
   },
+
   timeHighlight: {
     ...FONT.bodyStrong,
     color: PALETTE.amberWarning,
   },
+
   footer: {
     flexDirection: 'row',
     gap: SPACING.md,

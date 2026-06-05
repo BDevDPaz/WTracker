@@ -1,7 +1,7 @@
 // src/components/modals/DeleteSessionModal.tsx
 import React from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
-import Animated, { SlideInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
@@ -12,16 +12,24 @@ interface DeleteSessionModalProps {
   onConfirm: () => void;
 }
 
-export function DeleteSessionModal({ visible, onCancel, onConfirm }: DeleteSessionModalProps) {
+export function DeleteSessionModal({
+  visible,
+  onCancel,
+  onConfirm,
+}: DeleteSessionModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onCancel}
+    >
       <View style={styles.overlay}>
-        {/* Fondo táctil seguro para descartar la acción destructiva */}
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
 
-        {/* Tarjeta de confirmación con físicas de resorte */}
         <Animated.View
-          entering={SlideInDown.springify().damping(22).stiffness(250)}
+          entering={FadeInDown.duration(220)}
           style={styles.modalCard}
         >
           <View style={styles.alertHeader}>
@@ -32,7 +40,10 @@ export function DeleteSessionModal({ visible, onCancel, onConfirm }: DeleteSessi
           </View>
 
           <Text style={styles.subtitle}>
-            Esta acción es completamente irreversible y destructiva. Se borrarán permanentemente de la base de datos local todos los eventos de geolocalización, marcas de tiempo y cálculos financieros de esta sesión.
+            Esta acción es completamente irreversible y destructiva. Se borrarán
+            permanentemente de la base de datos local todos los eventos de
+            geolocalización, marcas de tiempo y cálculos financieros de esta
+            sesión.
           </Text>
 
           <View style={styles.footer}>
@@ -42,6 +53,7 @@ export function DeleteSessionModal({ visible, onCancel, onConfirm }: DeleteSessi
               onPress={onCancel}
               style={{ flex: 1 }}
             />
+
             <Button
               label="Eliminar"
               variant="danger"
@@ -61,6 +73,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
+
   modalCard: {
     backgroundColor: PALETTE.carbonMist,
     borderTopLeftRadius: RADIUS.cards,
@@ -71,12 +84,14 @@ const styles = StyleSheet.create({
     borderColor: PALETTE.steelLine,
     borderBottomWidth: 0,
   },
+
   alertHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
     marginBottom: SPACING.md,
   },
+
   iconWrapper: {
     width: 44,
     height: 44,
@@ -85,16 +100,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   title: {
     ...FONT.h2,
     color: PALETTE.textPrimary,
   },
+
   subtitle: {
     ...FONT.body,
     color: PALETTE.textSecondary,
     marginBottom: SPACING.xl,
     lineHeight: 22,
   },
+
   footer: {
     flexDirection: 'row',
     gap: SPACING.md,
