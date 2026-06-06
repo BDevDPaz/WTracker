@@ -1,4 +1,3 @@
-// app/(tabs)/history.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -10,14 +9,15 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, RADIUS, SPACING, FONT } from '../../src/constants/theme';
 import { IntegrityBadge, BadgeType } from '../../src/components/ui/IntegrityBadge';
 
 const MOCK_HISTORY = [
   {
     id: '101',
-    date: 'Hoy, 04 Jun',
-    destination: 'Taller Central - Revisión',
+    date: 'Hoy, 04 jun',
+    destination: 'Taller central - Revisión',
     time: '08:14 AM - 04:30 PM',
     hours: '8.2 h',
     earnings: '$164.00',
@@ -25,8 +25,8 @@ const MOCK_HISTORY = [
   },
   {
     id: '102',
-    date: 'Ayer, 03 Jun',
-    destination: 'Cliente: Residencia Norte',
+    date: 'Ayer, 03 jun',
+    destination: 'Residencia norte',
     time: '09:00 AM - 01:15 PM',
     hours: '4.2 h',
     earnings: '$84.00',
@@ -34,7 +34,7 @@ const MOCK_HISTORY = [
   },
   {
     id: '103',
-    date: '02 Jun 2026',
+    date: '02 jun 2026',
     destination: 'Oficinas Nexus',
     time: '07:30 AM - 06:00 PM',
     hours: '10.5 h',
@@ -43,8 +43,8 @@ const MOCK_HISTORY = [
   },
   {
     id: '104',
-    date: '01 Jun 2026',
-    destination: 'Sin nombre (Desconocido)',
+    date: '01 jun 2026',
+    destination: 'Destino no especificado',
     time: '08:00 AM - 05:00 PM',
     hours: '9.0 h',
     earnings: '$180.00',
@@ -52,8 +52,8 @@ const MOCK_HISTORY = [
   },
   {
     id: '105',
-    date: '30 May 2026',
-    destination: 'Taller Central',
+    date: '30 may 2026',
+    destination: 'Taller central',
     time: '08:00 AM - 12:00 PM',
     hours: '4.0 h',
     earnings: '$80.00',
@@ -86,28 +86,38 @@ export default function HistoryScreen() {
           <IntegrityBadge type={item.status} />
         </View>
 
-        <Text
-          style={[
-            styles.destinationTitle,
-            item.status === 'error' && styles.errorText,
-          ]}
-          numberOfLines={1}
-        >
-          {item.destination}
-        </Text>
+        <View style={styles.destinationRow}>
+          <Ionicons name="location-outline" size={16} color={PALETTE.textSecondary} />
+          <Text
+            style={[
+              styles.destinationTitle,
+              item.status === 'error' && styles.errorText,
+            ]}
+            numberOfLines={1}
+          >
+            {item.destination}
+          </Text>
+        </View>
 
         <Text style={styles.timeText}>{item.time}</Text>
 
         <View style={styles.cardBottomRow}>
-          <Text style={styles.hoursText}>{item.hours}</Text>
-          <Text
-            style={[
-              styles.earningsText,
-              item.status === 'error' && styles.errorText,
-            ]}
-          >
-            {item.earnings}
-          </Text>
+          <View style={styles.metricRow}>
+            <Ionicons name="time-outline" size={14} color={PALETTE.textSecondary} />
+            <Text style={styles.hoursText}>{item.hours}</Text>
+          </View>
+
+          <View style={styles.metricRow}>
+            <Ionicons name="cash-outline" size={14} color={PALETTE.mutedGold} />
+            <Text
+              style={[
+                styles.earningsText,
+                item.status === 'error' && styles.errorText,
+              ]}
+            >
+              {item.earnings}
+            </Text>
+          </View>
         </View>
       </AnimatedPressable>
     );
@@ -116,8 +126,12 @@ export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-        <Text style={styles.headerTitle}>Historial</Text>
-        <Text style={styles.headerSubtitle}>REGISTROS FORENSES</Text>
+        <View style={styles.headerRow}>
+          <Ionicons name="time-outline" size={22} color={PALETTE.textPrimary} />
+          <Text style={styles.headerTitle}>Historial</Text>
+        </View>
+
+        <Text style={styles.headerSubtitle}>Actividad registrada</Text>
       </Animated.View>
 
       <Animated.View
@@ -169,6 +183,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
 
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
@@ -176,11 +196,9 @@ const styles = StyleSheet.create({
   },
 
   headerSubtitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 2,
+    fontSize: 12,
     color: PALETTE.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
   },
 
   filterContainer: {
@@ -229,7 +247,6 @@ const styles = StyleSheet.create({
 
   errorCard: {
     borderColor: PALETTE.deepRed,
-    borderWidth: 1,
   },
 
   cardTopRow: {
@@ -244,11 +261,18 @@ const styles = StyleSheet.create({
     color: PALETTE.textSecondary,
   },
 
+  destinationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+
   destinationTitle: {
     ...FONT.h3,
     fontSize: 18,
     color: PALETTE.textPrimary,
-    marginBottom: 4,
+    flex: 1,
   },
 
   errorText: {
@@ -270,6 +294,12 @@ const styles = StyleSheet.create({
     borderTopColor: PALETTE.graphite,
   },
 
+  metricRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+
   hoursText: {
     ...FONT.bodyStrong,
     color: PALETTE.textPrimary,
@@ -285,4 +315,3 @@ const styles = StyleSheet.create({
     height: 40,
   },
 });
-

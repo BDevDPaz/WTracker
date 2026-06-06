@@ -1,4 +1,3 @@
-// src/components/modals/DailySetupModal.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Modal,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
@@ -28,7 +28,6 @@ export function DailySetupModal({
   const [dest, setDest] = useState('');
   const [addr, setAddr] = useState('');
 
-  // Limpieza del estado al abrir
   useEffect(() => {
     if (visible) {
       setDest('');
@@ -39,10 +38,8 @@ export function DailySetupModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.overlay}>
-        {/* Fondo táctil */}
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
 
-        {/* Contenedor dinámico para teclado */}
         <KeyboardAwareScrollView
           contentContainerStyle={styles.scrollContainer}
           keyboardShouldPersistTaps="handled"
@@ -53,32 +50,44 @@ export function DailySetupModal({
             entering={SlideInDown.springify().damping(22).stiffness(250)}
             style={styles.modalCard}
           >
-            <Text style={styles.title}>Iniciar Jornada</Text>
+            <View style={styles.headerRow}>
+              <Ionicons name="play-circle-outline" size={22} color={PALETTE.mutedGold} />
+              <Text style={styles.title}>Iniciar jornada</Text>
+            </View>
+
             <Text style={styles.subtitle}>
-              Confirma tu destino para el rastreo de zona.
+              Ingresa el destino donde comenzarás la jornada.
             </Text>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Destino / Cliente</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Taller Central"
-                placeholderTextColor={PALETTE.textMuted}
-                value={dest}
-                onChangeText={setDest}
-                autoFocus
-              />
+              <Text style={styles.label}>Destino</Text>
+
+              <View style={styles.inputRow}>
+                <Ionicons name="location-outline" size={16} color={PALETTE.textSecondary} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej. Taller central"
+                  placeholderTextColor={PALETTE.textMuted}
+                  value={dest}
+                  onChangeText={setDest}
+                  autoFocus
+                />
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Dirección (Opcional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. 123 Main St"
-                placeholderTextColor={PALETTE.textMuted}
-                value={addr}
-                onChangeText={setAddr}
-              />
+              <Text style={styles.label}>Dirección (opcional)</Text>
+
+              <View style={styles.inputRow}>
+                <Ionicons name="map-outline" size={16} color={PALETTE.textSecondary} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej. 123 Main St"
+                  placeholderTextColor={PALETTE.textMuted}
+                  value={addr}
+                  onChangeText={setAddr}
+                />
+              </View>
             </View>
 
             <View style={styles.footer}>
@@ -90,13 +99,14 @@ export function DailySetupModal({
               />
 
               <Button
-                label="Iniciar"
+                label="Iniciar jornada"
                 variant="primary"
-                onPress={() => onConfirm(dest || 'Sin nombre', addr)}
+                onPress={() => onConfirm(dest || 'Destino no especificado', addr)}
                 style={{ flex: 1 }}
                 disabled={!dest.trim()}
               />
             </View>
+
           </Animated.View>
         </KeyboardAwareScrollView>
       </View>
@@ -126,10 +136,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
 
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: SPACING.xs,
+  },
+
   title: {
     ...FONT.h2,
     color: PALETTE.textPrimary,
-    marginBottom: SPACING.xs,
   },
 
   subtitle: {
@@ -148,15 +164,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  input: {
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: PALETTE.graphite,
     borderRadius: RADIUS.inputs,
-    height: 52,
-    paddingHorizontal: SPACING.lg,
-    color: PALETTE.textPrimary,
-    ...FONT.body,
     borderWidth: 1,
     borderColor: PALETTE.steelLine,
+    paddingHorizontal: SPACING.md,
+  },
+
+  input: {
+    flex: 1,
+    height: 52,
+    color: PALETTE.textPrimary,
+    ...FONT.body,
   },
 
   footer: {
@@ -165,4 +188,3 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
 });
-

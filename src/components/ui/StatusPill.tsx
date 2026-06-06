@@ -1,60 +1,107 @@
-// src/components/ui/StatusPill.tsx
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
-import { PALETTE, RADIUS, FONT } from '../../constants/theme';
+import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 
-// 1. Asegúrate de que tenga "export" aquí
-export type PillStatus = 'idle' | 'pending' | 'active' | 'warning' | 'error' | 'closed';
+export type PillStatus =
+  | 'idle'
+  | 'pending'
+  | 'active'
+  | 'warning'
+  | 'error'
+  | 'closed';
 
 interface StatusPillProps {
   status: PillStatus;
   label: string;
 }
 
-// 2. Asegúrate de que tenga "export" aquí también
 export function StatusPill({ status, label }: StatusPillProps) {
-  const getStyles = () => {
+  const getConfig = () => {
     switch (status) {
-      case 'idle': 
-        return { bg: PALETTE.graphite, text: PALETTE.textSecondary };
-      case 'pending': 
-        return { bg: 'rgba(92, 124, 250, 0.1)', text: PALETTE.slateBlue };
-      case 'active': 
-        return { bg: 'rgba(212, 175, 55, 0.1)', text: PALETTE.mutedGold };
-      case 'warning': 
-        return { bg: 'rgba(242, 153, 74, 0.1)', text: PALETTE.amberWarning };
-      case 'error': 
-        return { bg: 'rgba(235, 87, 87, 0.1)', text: PALETTE.deepRed };
-      case 'closed': 
-        return { bg: 'rgba(39, 174, 96, 0.1)', text: PALETTE.successGreen };
+      case 'idle':
+        return {
+          bg: PALETTE.graphite,
+          text: PALETTE.textSecondary,
+          icon: 'pause-outline' as const,
+        };
+
+      case 'pending':
+        return {
+          bg: 'rgba(92, 124, 250, 0.1)',
+          text: PALETTE.slateBlue,
+          icon: 'time-outline' as const,
+        };
+
+      case 'active':
+        return {
+          bg: 'rgba(212, 175, 55, 0.1)',
+          text: PALETTE.mutedGold,
+          icon: 'play-outline' as const,
+        };
+
+      case 'warning':
+        return {
+          bg: 'rgba(242, 153, 74, 0.1)',
+          text: PALETTE.amberWarning,
+          icon: 'warning-outline' as const,
+        };
+
+      case 'error':
+        return {
+          bg: 'rgba(235, 87, 87, 0.1)',
+          text: PALETTE.deepRed,
+          icon: 'alert-circle-outline' as const,
+        };
+
+      case 'closed':
+        return {
+          bg: 'rgba(39, 174, 96, 0.1)',
+          text: PALETTE.successGreen,
+          icon: 'checkmark-done-outline' as const,
+        };
     }
   };
 
-  const current = getStyles();
+  const config = getConfig();
 
   return (
-    <Animated.View 
+    <Animated.View
       layout={LinearTransition.springify().damping(20).stiffness(200)}
-      style={[styles.pill, { backgroundColor: current.bg }]}
+      style={[styles.pill, { backgroundColor: config.bg }]}
     >
-      <Text style={[styles.label, { color: current.text }]}>{label}</Text>
+      <Ionicons
+        name={config.icon}
+        size={14}
+        color={config.text}
+        style={styles.icon}
+      />
+
+      <Text style={[styles.label, { color: config.text }]}>
+        {label}
+      </Text>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  pill: { 
-    paddingHorizontal: 12, 
-    paddingVertical: 6, 
-    borderRadius: RADIUS.round, 
-    alignSelf: 'flex-start' 
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADIUS.round,
+    alignSelf: 'flex-start',
   },
-  label: { 
-    ...FONT.caption, 
-    fontWeight: '700', 
-    textTransform: 'uppercase', 
-    letterSpacing: 0.5 
+
+  icon: {
+    marginRight: SPACING.xs,
+  },
+
+  label: {
+    ...FONT.caption,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
-

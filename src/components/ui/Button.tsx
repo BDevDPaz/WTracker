@@ -1,4 +1,3 @@
-// src/components/ui/Button.tsx
 import React from 'react';
 import {
   Text,
@@ -9,14 +8,16 @@ import {
   Platform,
   StyleProp,
   ViewStyle,
+  View,
 } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { PALETTE, RADIUS, FONT } from '../../constants/theme';
+import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
@@ -25,6 +26,7 @@ interface ButtonProps extends Omit<PressableProps, 'style'> {
   variant?: ButtonVariant;
   isLoading?: boolean;
   style?: StyleProp<ViewStyle>;
+  iconName?: React.ComponentProps<typeof Ionicons>['name'];
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -38,6 +40,7 @@ export function Button({
   disabled = false,
   onPressIn,
   onPressOut,
+  iconName,
   ...props
 }: ButtonProps) {
   const scale = useSharedValue(1);
@@ -47,7 +50,9 @@ export function Button({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePressIn = (event: Parameters<NonNullable<PressableProps['onPressIn']>>[0]) => {
+  const handlePressIn = (
+    event: Parameters<NonNullable<PressableProps['onPressIn']>>[0]
+  ) => {
     if (!isDisabled) {
       scale.value = withSpring(0.96, { damping: 20, stiffness: 300 });
 
@@ -61,7 +66,9 @@ export function Button({
     }
   };
 
-  const handlePressOut = (event: Parameters<NonNullable<PressableProps['onPressOut']>>[0]) => {
+  const handlePressOut = (
+    event: Parameters<NonNullable<PressableProps['onPressOut']>>[0]
+  ) => {
     scale.value = withSpring(1, { damping: 20, stiffness: 300 });
 
     if (onPressOut) {
@@ -69,7 +76,9 @@ export function Button({
     }
   };
 
-  const handlePress = (event: Parameters<NonNullable<PressableProps['onPress']>>[0]) => {
+  const handlePress = (
+    event: Parameters<NonNullable<PressableProps['onPress']>>[0]
+  ) => {
     if (isDisabled) {
       return;
     }
@@ -95,21 +104,18 @@ export function Button({
           textColor: PALETTE.obsidian,
           borderColor: PALETTE.mutedGold,
         };
-
       case 'secondary':
         return {
           backgroundColor: 'transparent',
           textColor: PALETTE.textPrimary,
           borderColor: PALETTE.steelLine,
         };
-
       case 'danger':
         return {
           backgroundColor: PALETTE.deepRed,
           textColor: '#FFFFFF',
           borderColor: PALETTE.deepRed,
         };
-
       case 'ghost':
       default:
         return {
@@ -144,7 +150,20 @@ export function Button({
       {isLoading ? (
         <ActivityIndicator color={variantStyles.textColor} />
       ) : (
-        <Text style={[styles.label, { color: variantStyles.textColor }]}>{label}</Text>
+        <View style={styles.content}>
+          {iconName ? (
+            <Ionicons
+              name={iconName}
+              size={18}
+              color={variantStyles.textColor}
+              style={styles.icon}
+            />
+          ) : null}
+
+          <Text style={[styles.label, { color: variantStyles.textColor }]}>
+            {label}
+          </Text>
+        </View>
       )}
     </AnimatedPressable>
   );
@@ -152,12 +171,21 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    height: 56,
+    minHeight: 56,
     borderRadius: RADIUS.inputs,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+  },
+  icon: {
+    marginRight: 2,
   },
   label: {
     ...FONT.bodyStrong,
@@ -167,4 +195,3 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 });
-

@@ -1,4 +1,3 @@
-// src/components/ui/AppBrandTitle.tsx
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
@@ -15,10 +14,12 @@ type AppBrandTitleProps = {
   subtitle?: string;
 };
 
-export function AppBrandTitle({ subtitle = 'CONTROL DIARIO' }: AppBrandTitleProps) {
+export function AppBrandTitle({
+  subtitle = 'CONTROL DE JORNADA',
+}: AppBrandTitleProps) {
   const glowOpacity = useSharedValue(0.14);
   const glowScale = useSharedValue(1);
-  const lineScale = useSharedValue(0.35); // Reemplaza la animación de width por escala
+  const lineScale = useSharedValue(0.35);
   const titleLift = useSharedValue(8);
   const titleOpacity = useSharedValue(0);
 
@@ -35,8 +36,8 @@ export function AppBrandTitle({ subtitle = 'CONTROL DIARIO' }: AppBrandTitleProp
 
     glowScale.value = withRepeat(
       withSequence(
-        withTiming(1.025, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) })
+        withTiming(1.025, { duration: 1800 }),
+        withTiming(1, { duration: 1800 })
       ),
       -1,
       false
@@ -44,19 +45,18 @@ export function AppBrandTitle({ subtitle = 'CONTROL DIARIO' }: AppBrandTitleProp
 
     glowOpacity.value = withRepeat(
       withSequence(
-        withTiming(0.24, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.12, { duration: 1800, easing: Easing.inOut(Easing.ease) })
+        withTiming(0.24, { duration: 1800 }),
+        withTiming(0.12, { duration: 1800 })
       ),
       -1,
       false
     );
 
-    // Animación infinita optimizada delegada a la GPU
     lineScale.value = withRepeat(
       withSequence(
-        withTiming(0.85, { duration: 1400, easing: Easing.out(Easing.cubic) }),
-        withTiming(0.85, { duration: 1200, easing: Easing.linear }),
-        withTiming(0.35, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+        withTiming(0.85, { duration: 1400 }),
+        withTiming(0.85, { duration: 1200 }),
+        withTiming(0.35, { duration: 1000 })
       ),
       -1,
       false
@@ -75,29 +75,29 @@ export function AppBrandTitle({ subtitle = 'CONTROL DIARIO' }: AppBrandTitleProp
 
   const lineAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scaleX: lineScale.value }],
-    transformOrigin: 'left', // Anclaje físico para que expanda de izquierda a derecha sin recalcular layout
     opacity: 0.7 + lineScale.value * 0.3,
   }));
 
   return (
     <View style={styles.container}>
+      
       <Animated.View style={[styles.titleRow, titleAnimatedStyle]}>
         <View style={styles.wordmarkWrap}>
           <Animated.View style={[styles.accentGlow, accentAnimatedStyle]} />
+
           <Text style={styles.title}>
             <Text style={styles.titleAccent}>W</Text>
-            <Text style={styles.titleMain}> Tracker</Text>
+            <Text style={styles.titleMain}>Tracker</Text>
           </Text>
         </View>
       </Animated.View>
 
-      <Animated.Text style={styles.subtitle}>
-        {subtitle}
-      </Animated.Text>
+      <Text style={styles.subtitle}>{subtitle}</Text>
 
       <View style={styles.lineTrack}>
         <Animated.View style={[styles.lineAccent, lineAnimatedStyle]} />
       </View>
+
     </View>
   );
 }
@@ -106,14 +106,17 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
   },
+
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+
   wordmarkWrap: {
     position: 'relative',
     justifyContent: 'center',
   },
+
   accentGlow: {
     position: 'absolute',
     left: -4,
@@ -123,26 +126,31 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.inputs,
     backgroundColor: 'rgba(212, 175, 55, 0.12)',
   },
+
   title: {
-    fontSize: 31,
+    fontSize: 30,
     fontWeight: '800',
     letterSpacing: -0.4,
     color: PALETTE.textPrimary,
   },
+
   titleAccent: {
     color: PALETTE.mutedGold,
   },
+
   titleMain: {
     color: PALETTE.textPrimary,
   },
+
   subtitle: {
     ...FONT.caption,
     marginTop: 4,
     fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 2.2,
+    letterSpacing: 2,
     color: PALETTE.textSecondary,
   },
+
   lineTrack: {
     marginTop: 10,
     height: 2,
@@ -151,11 +159,11 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     overflow: 'hidden',
   },
+
   lineAccent: {
     height: 2,
-    width: '100%', // Base estática completa sobre el contenedor
+    width: '100%',
     borderRadius: 2,
     backgroundColor: PALETTE.mutedGold,
   },
 });
-

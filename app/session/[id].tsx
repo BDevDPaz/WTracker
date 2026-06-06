@@ -1,4 +1,3 @@
-// app/session/[id].tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -39,12 +38,13 @@ export default function SessionDetailScreen() {
 
   const handleSaveEdit = () => {
     setIsEditVisible(false);
-    showToast('Registro forense actualizado', 'success');
+    showToast('Jornada actualizada', 'success');
   };
 
   const handleConfirmDelete = () => {
     setIsDeleteVisible(false);
-    showToast('Registro eliminado del sistema', 'error');
+    showToast('Jornada eliminada', 'error');
+
     setTimeout(() => {
       router.back();
     }, 500);
@@ -52,12 +52,16 @@ export default function SessionDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <Pressable onPress={handleBack} style={styles.backButton}>
           <Ionicons name="close" size={28} color={PALETTE.textPrimary} />
         </Pressable>
 
-        <Text style={styles.headerTitle}>Detalle de Sesión</Text>
+        <View style={styles.headerCenter}>
+          <Ionicons name="document-text-outline" size={18} color={PALETTE.textPrimary} />
+          <Text style={styles.headerTitle}>Detalle de jornada</Text>
+        </View>
 
         <View style={styles.headerSpacer} />
       </Animated.View>
@@ -66,16 +70,23 @@ export default function SessionDetailScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        
         <Animated.View
           entering={FadeInDown.delay(100).springify().damping(20)}
           style={styles.heroBlock}
         >
           <View style={styles.heroTopRow}>
-            <Text style={styles.dateText}>04 Jun 2026</Text>
+            <Text style={styles.dateText}>04 jun 2026</Text>
             <IntegrityBadge type="valid" />
           </View>
 
-          <Text style={styles.destinationText}>Taller Central - Revisión</Text>
+          <View style={styles.destinationRow}>
+            <Ionicons name="location-outline" size={16} color={PALETTE.textSecondary} />
+            <Text style={styles.destinationText}>
+              Taller central - Revisión
+            </Text>
+          </View>
+
           <Text style={styles.idText}>ID: TRK-{sessionId}-88A</Text>
         </Animated.View>
 
@@ -84,12 +95,12 @@ export default function SessionDetailScreen() {
           style={styles.metricsGrid}
         >
           <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>Horas Netas</Text>
+            <Text style={styles.metricLabel}>Horas totales</Text>
             <Text style={styles.metricValue}>8.2 h</Text>
           </View>
 
           <View style={[styles.metricCard, styles.highlightMetricCard]}>
-            <Text style={styles.metricLabel}>Total Estimado</Text>
+            <Text style={styles.metricLabel}>Ganancias estimadas</Text>
             <Text style={[styles.metricValue, styles.highlightMetricValue]}>
               $164.00
             </Text>
@@ -100,14 +111,14 @@ export default function SessionDetailScreen() {
           entering={FadeInDown.delay(300).springify().damping(20)}
           style={styles.timelineBlock}
         >
-          <Text style={styles.sectionTitle}>Registro de Eventos</Text>
+          <Text style={styles.sectionTitle}>Eventos de la jornada</Text>
 
           <View style={styles.timelineNode}>
             <View style={[styles.nodeDot, styles.nodeDotStart]} />
             <View style={styles.nodeLine} />
             <View style={styles.nodeContent}>
-              <Text style={styles.nodeTitle}>Jornada Iniciada</Text>
-              <Text style={styles.nodeTime}>08:14 AM • GPS Confirmado</Text>
+              <Text style={styles.nodeTitle}>Inicio de jornada</Text>
+              <Text style={styles.nodeTime}>08:14 AM • GPS confirmado</Text>
             </View>
           </View>
 
@@ -115,16 +126,16 @@ export default function SessionDetailScreen() {
             <View style={[styles.nodeDot, styles.nodeDotArrival]} />
             <View style={styles.nodeLine} />
             <View style={styles.nodeContent}>
-              <Text style={styles.nodeTitle}>Llegada al Destino</Text>
-              <Text style={styles.nodeTime}>08:45 AM • Geo-fence Auto</Text>
+              <Text style={styles.nodeTitle}>Llegada al destino</Text>
+              <Text style={styles.nodeTime}>08:45 AM • Geolocalización automática</Text>
             </View>
           </View>
 
           <View style={styles.timelineNode}>
             <View style={[styles.nodeDot, styles.nodeDotClose]} />
             <View style={styles.nodeContent}>
-              <Text style={styles.nodeTitle}>Cierre de Jornada</Text>
-              <Text style={styles.nodeTime}>04:30 PM • Cierre Manual</Text>
+              <Text style={styles.nodeTitle}>Fin de jornada</Text>
+              <Text style={styles.nodeTime}>04:30 PM • Cierre manual</Text>
             </View>
           </View>
         </Animated.View>
@@ -137,7 +148,7 @@ export default function SessionDetailScreen() {
         style={styles.actionFooter}
       >
         <Button
-          label="Ajustar Registro"
+          label="Editar jornada"
           variant="secondary"
           onPress={() => setIsEditVisible(true)}
           style={{ flex: 1 }}
@@ -147,7 +158,7 @@ export default function SessionDetailScreen() {
           label="Eliminar"
           variant="danger"
           onPress={() => setIsDeleteVisible(true)}
-          style={{ width: 100 }}
+          style={{ width: 110 }}
         />
       </Animated.View>
 
@@ -186,6 +197,12 @@ const styles = StyleSheet.create({
     marginLeft: -4,
   },
 
+  headerCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+
   headerTitle: {
     ...FONT.h3,
     fontSize: 18,
@@ -221,11 +238,18 @@ const styles = StyleSheet.create({
     color: PALETTE.textSecondary,
   },
 
+  destinationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: SPACING.xs,
+  },
+
   destinationText: {
     fontSize: 22,
     fontWeight: '700',
     color: PALETTE.textPrimary,
-    marginBottom: SPACING.xs,
+    flex: 1,
   },
 
   idText: {
@@ -356,4 +380,3 @@ const styles = StyleSheet.create({
     borderTopColor: PALETTE.steelLine,
   },
 });
-

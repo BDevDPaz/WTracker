@@ -1,4 +1,3 @@
-// src/components/modals/EditSessionModal.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Modal,
@@ -64,30 +63,32 @@ export function EditSessionModal({
             entering={FadeInDown.duration(220)}
             style={styles.modalCard}
           >
-            <Text style={styles.title}>Ajustar registro</Text>
+            <View style={styles.headerRow}>
+              <Ionicons name="create-outline" size={20} color={PALETTE.mutedGold} />
+              <Text style={styles.title}>Editar jornada</Text>
+            </View>
+
             <Text style={styles.subtitle}>
-              Modifica los horarios de la sesión seleccionada.
+              Ajusta los horarios registrados de esta jornada.
             </Text>
 
             {isCorrupted ? (
               <View style={styles.warningBanner}>
-                <Ionicons name="warning" size={16} color={PALETTE.deepRed} />
+                <Ionicons name="warning-outline" size={16} color={PALETTE.deepRed} />
                 <Text style={styles.warningText}>
-                  El sistema detectó datos corruptos en el caché de la sesión.
-                  Ingresa horarios válidos.
+                  Se detectaron datos inválidos. Ingresa horarios correctos.
                 </Text>
               </View>
             ) : (
               inTime !== '04:56 PM' && (
                 <View style={styles.infoBanner}>
                   <Ionicons
-                    name="alert-circle"
+                    name="alert-circle-outline"
                     size={16}
                     color={PALETTE.mutedGold}
                   />
                   <Text style={styles.infoText}>
-                    El cálculo total estimado será recalculado en la base de
-                    datos.
+                    El cálculo de la jornada será actualizado.
                   </Text>
                 </View>
               )
@@ -95,33 +96,33 @@ export function EditSessionModal({
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, styles.leftColumn]}>
-                <Text style={styles.label}>Entrada (HH:MM AM/PM)</Text>
+                <Text style={styles.label}>Hora de inicio</Text>
                 <TextInput
                   style={[styles.input, isCorrupted && styles.inputError]}
                   value={inTime}
                   onChangeText={setInTime}
+                  placeholder="08:00 AM"
                   placeholderTextColor={PALETTE.textMuted}
                 />
               </View>
 
               <View style={[styles.inputGroup, styles.rightColumn]}>
-                <Text style={styles.label}>Salida (HH:MM AM/PM)</Text>
+                <Text style={styles.label}>Hora de fin</Text>
                 <TextInput
                   style={[styles.input, isCorrupted && styles.inputError]}
                   value={outTime}
                   onChangeText={setOutTime}
+                  placeholder="05:00 PM"
                   placeholderTextColor={PALETTE.textMuted}
                 />
               </View>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                Nota de ajuste (Obligatoria para auditoría)
-              </Text>
+              <Text style={styles.label}>Motivo del ajuste</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
-                placeholder="Escribe el motivo del ajuste manual..."
+                placeholder="Describe el motivo del cambio..."
                 placeholderTextColor={PALETTE.textMuted}
                 value={note}
                 onChangeText={setNote}
@@ -139,13 +140,14 @@ export function EditSessionModal({
               />
 
               <Button
-                label="Guardar"
+                label="Guardar cambios"
                 variant="primary"
                 onPress={onSave}
                 style={{ flex: 1 }}
                 disabled={!note.trim() || isCorrupted}
               />
             </View>
+
           </Animated.View>
         </KeyboardAwareScrollView>
       </View>
@@ -175,10 +177,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
 
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: SPACING.xs,
+  },
+
   title: {
     ...FONT.h2,
     color: PALETTE.textPrimary,
-    marginBottom: SPACING.xs,
   },
 
   subtitle: {
@@ -273,4 +281,3 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
 });
-

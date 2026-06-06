@@ -1,4 +1,3 @@
-// src/components/modals/ExitDetectionModal.tsx
 import React from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -30,34 +29,38 @@ export function ExitDetectionModal({
       <View style={styles.overlay}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onContinueOperating} />
 
-        <Animated.View entering={FadeInDown.duration(220)} style={styles.modalCard}>
+        <Animated.View
+          entering={FadeInDown.duration(220)}
+          style={styles.modalCard}
+        >
           <View style={styles.alertHeader}>
             <View style={styles.iconWrapper}>
               <Ionicons
-                name="warning"
+                name="warning-outline"
                 size={24}
                 color={PALETTE.amberWarning}
               />
             </View>
-            <Text style={styles.title}>Salida Detectada</Text>
+
+            <Text style={styles.title}>Salida de zona detectada</Text>
           </View>
 
           <Text style={styles.subtitle}>
-            El motor geo-fence detectó un abandono de la zona protegida a las{' '}
-            <Text style={styles.timeHighlight}>{exitTime}</Text>. ¿Deseas mantener
-            la sesión activa o cerrar la jornada laboral?
+            Se detectó una salida de la zona registrada a las{' '}
+            <Text style={styles.timeHighlight}>{exitTime}</Text>.  
+            ¿Deseas continuar con la jornada o finalizarla?
           </Text>
 
           <View style={styles.footer}>
             <Button
-              label="Cerrar Jornada"
+              label="Finalizar jornada"
               variant="secondary"
               onPress={onCloseShift}
               style={{ flex: 1 }}
             />
 
             <Button
-              label="Continuar"
+              label="Continuar jornada"
               variant="primary"
               onPress={onContinueOperating}
               style={{ flex: 1 }}
@@ -125,4 +128,3 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
 });
-

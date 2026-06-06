@@ -1,4 +1,3 @@
-// src/components/modals/DeleteSessionModal.tsx
 import React from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -34,16 +33,19 @@ export function DeleteSessionModal({
         >
           <View style={styles.alertHeader}>
             <View style={styles.iconWrapper}>
-              <Ionicons name="trash-bin" size={24} color={PALETTE.deepRed} />
+              <Ionicons
+                name="trash-bin-outline"
+                size={24}
+                color={PALETTE.deepRed}
+              />
             </View>
-            <Text style={styles.title}>Eliminar Registro</Text>
+
+            <Text style={styles.title}>Eliminar jornada</Text>
           </View>
 
           <Text style={styles.subtitle}>
-            Esta acción es completamente irreversible y destructiva. Se borrarán
-            permanentemente de la base de datos local todos los eventos de
-            geolocalización, marcas de tiempo y cálculos financieros de esta
-            sesión.
+            Esta acción es irreversible. Se eliminarán permanentemente todos los
+            eventos, registros de tiempo y cálculos asociados a esta jornada.
           </Text>
 
           <View style={styles.footer}>
@@ -118,4 +120,3 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
 });
-

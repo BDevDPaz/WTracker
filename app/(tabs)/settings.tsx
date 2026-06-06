@@ -1,4 +1,3 @@
-// app/(tabs)/settings.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -32,21 +31,12 @@ export default function SettingsScreen() {
 
   const markAsDirty = () => setIsDirty(true);
 
-  /**
-   * Simulación de validación segura asíncrona.
-   *
-   * En producción, esta función debe delegar la validación a un backend o a un flujo
-   * de autenticación seguro. Este hash local existe solo como puente de arquitectura
-   * para evitar comparar el PIN en texto plano directamente dentro del controlador UI.
-   */
   const verifyAdminPinSecurely = async (candidatePin: string): Promise<boolean> => {
     await new Promise((resolve) => setTimeout(resolve, 650));
-
     const candidateHash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       candidatePin.trim()
     );
-
     return candidateHash === DEMO_ADMIN_PIN_SHA256;
   };
 
@@ -55,7 +45,7 @@ export default function SettingsScreen() {
 
     if (!normalizedPin) {
       setPinError(true);
-      showToast('Ingresa tu PIN para continuar.', 'warning');
+      showToast('Ingresa tu PIN para continuar', 'warning');
       return;
     }
 
@@ -67,18 +57,17 @@ export default function SettingsScreen() {
 
       if (isValid) {
         setIsUnlocked(true);
-        setPinError(false);
         setPin('');
-        showToast('Zona administrativa desbloqueada', 'success');
+        showToast('Acceso desbloqueado', 'success');
       } else {
         setIsUnlocked(false);
         setPinError(true);
-        showToast('PIN incorrecto. Acceso denegado.', 'info');
+        showToast('PIN incorrecto', 'error');
       }
     } catch {
       setIsUnlocked(false);
       setPinError(true);
-      showToast('No fue posible validar el acceso administrativo.', 'error');
+      showToast('No fue posible validar el acceso', 'error');
     } finally {
       setIsUnlocking(false);
     }
@@ -88,17 +77,17 @@ export default function SettingsScreen() {
     setIsUnlocked(false);
     setPin('');
     setPinError(false);
-    showToast('Zona administrativa bloqueada de forma segura', 'info');
+    showToast('Acceso bloqueado', 'info');
   };
 
   const handleSave = () => {
     if (!hasPermissions) {
-      showToast('Error: Se requieren permisos de GPS para operar', 'error');
+      showToast('Se requieren permisos de ubicación', 'error');
       return;
     }
 
     setIsDirty(false);
-    showToast('Configuración guardada exitosamente', 'success');
+    showToast('Configuración guardada', 'success');
   };
 
   const togglePermissionsSimulator = () => {
@@ -106,28 +95,32 @@ export default function SettingsScreen() {
     setHasPermissions(newState);
 
     if (newState) {
-      showToast('Sistema: Permisos de ubicación restaurados', 'success');
+      showToast('Permisos restaurados', 'success');
     } else {
-      showToast('CRÍTICO: El SO revocó los permisos en segundo plano', 'warning');
+      showToast('Permisos de ubicación desactivados', 'warning');
       markAsDirty();
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* HEADER */}
+      
       <Animated.View entering={FadeInDown.duration(400)}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Ajustes</Text>
-          <Text style={styles.headerSubtitle}>CONFIGURACIÓN Y SEGURIDAD</Text>
+          <View style={styles.headerRow}>
+            <Ionicons name="settings-outline" size={22} color={PALETTE.textPrimary} />
+            <Text style={styles.headerTitle}>Ajustes</Text>
+          </View>
+
+          <Text style={styles.headerSubtitle}>Configuración y seguridad</Text>
         </View>
       </Animated.View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* PERFIL LABORAL */}
+        
         <Animated.View entering={FadeInDown.delay(100).springify().damping(20)}>
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Perfil Laboral</Text>
+            <Text style={styles.sectionTitle}>Perfil laboral</Text>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Nombre</Text>
@@ -140,7 +133,7 @@ export default function SettingsScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Tarifa por hora ($)</Text>
+              <Text style={styles.inputLabel}>Tarifa por hora</Text>
               <TextInput
                 style={styles.input}
                 defaultValue="20.00"
@@ -152,11 +145,11 @@ export default function SettingsScreen() {
           </View>
         </Animated.View>
 
-        {/* PARÁMETROS DE JORNADA */}
         <Animated.View entering={FadeInDown.delay(200).springify().damping(20)}>
           <View style={[styles.card, !isUnlocked && styles.cardLocked]}>
+            
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.sectionTitle}>Parámetros de Jornada</Text>
+              <Text style={styles.sectionTitle}>Parámetros de jornada</Text>
               {!isUnlocked && <Ionicons name="lock-closed" size={16} color={PALETTE.mutedGold} />}
             </View>
 
@@ -172,7 +165,7 @@ export default function SettingsScreen() {
               </View>
 
               <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>Mult. Overtime</Text>
+                <Text style={styles.inputLabel}>Multiplicador extra</Text>
                 <TextInput
                   style={[styles.input, !isUnlocked && styles.inputDisabled]}
                   defaultValue="1.5"
@@ -181,18 +174,20 @@ export default function SettingsScreen() {
                 />
               </View>
             </View>
+
           </View>
         </Animated.View>
 
-        {/* MONITOREO Y UBICACIÓN */}
         <Animated.View entering={FadeInDown.delay(300).springify().damping(20)}>
-          <View
-            style={[styles.card, !hasPermissions && { borderColor: PALETTE.deepRed, borderWidth: 1 }]}
-          >
+          <View style={[styles.card, !hasPermissions && { borderColor: PALETTE.deepRed, borderWidth: 1 }]}>
+            
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.sectionTitle}>Monitoreo y Ubicación</Text>
+              <Text style={styles.sectionTitle}>Ubicación</Text>
+
               <Pressable onPress={togglePermissionsSimulator}>
-                <Text style={{ ...FONT.label, color: PALETTE.mutedGold }}>Simular SO</Text>
+                <Text style={{ ...FONT.label, color: PALETTE.mutedGold }}>
+                  Simular sistema
+                </Text>
               </Pressable>
             </View>
 
@@ -204,7 +199,9 @@ export default function SettingsScreen() {
                 ]}
               />
               <Text style={[styles.healthText, !hasPermissions && { color: PALETTE.deepRed }]}>
-                {hasPermissions ? 'Permiso de ubicación activo' : 'Permiso de ubicación REVOCADO'}
+                {hasPermissions
+                  ? 'Permiso de ubicación activo'
+                  : 'Permiso de ubicación desactivado'}
               </Text>
             </View>
 
@@ -218,13 +215,13 @@ export default function SettingsScreen() {
               <Text style={[styles.healthText, !hasPermissions && { color: PALETTE.deepRed }]}>
                 {hasPermissions
                   ? 'Ubicación en segundo plano activa'
-                  : 'Ubicación bloqueada por sistema'}
+                  : 'Ubicación bloqueada'}
               </Text>
             </View>
+
           </View>
         </Animated.View>
 
-        {/* ZONA ADMINISTRATIVA */}
         <Animated.View entering={FadeInDown.delay(400).springify().damping(20)}>
           <View
             style={[
@@ -235,12 +232,14 @@ export default function SettingsScreen() {
               },
             ]}
           >
+            
             <View style={styles.secureBlockHeader}>
               <Ionicons
                 name={isUnlocked ? 'lock-open' : 'lock-closed'}
                 size={20}
                 color={isUnlocked ? PALETTE.successGreen : PALETTE.mutedGold}
               />
+
               <Text
                 style={[
                   styles.sectionTitle,
@@ -250,14 +249,14 @@ export default function SettingsScreen() {
                   },
                 ]}
               >
-                Zona Administrativa
+                Acceso protegido
               </Text>
             </View>
 
             <Text style={styles.secureBlockDesc}>
               {isUnlocked
-                ? 'Acceso concedido. Parámetros desbloqueados.'
-                : 'Esta sección requiere acceso protegido.'}
+                ? 'Parámetros desbloqueados'
+                : 'Esta sección requiere autenticación'}
             </Text>
 
             {!isUnlocked ? (
@@ -285,15 +284,15 @@ export default function SettingsScreen() {
                 />
               </View>
             ) : (
-              <Button label="Bloquear panel" variant="secondary" onPress={handleLock} />
+              <Button label="Bloquear acceso" variant="secondary" onPress={handleLock} />
             )}
+
           </View>
         </Animated.View>
 
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* FOOTER FLOTANTE */}
       <Animated.View entering={SlideInDown.delay(500).springify().damping(20)}>
         <View style={styles.actionFooter}>
           <Button
@@ -304,6 +303,7 @@ export default function SettingsScreen() {
           />
         </View>
       </Animated.View>
+
     </SafeAreaView>
   );
 }
@@ -313,62 +313,79 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: PALETTE.obsidian,
   },
+
   header: {
     marginHorizontal: SPACING.xl,
     marginTop: SPACING.sm,
     marginBottom: SPACING.xl,
   },
+
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
     color: PALETTE.textPrimary,
   },
+
   headerSubtitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 2,
+    fontSize: 12,
     color: PALETTE.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
   },
+
   scrollContent: {
     paddingHorizontal: SPACING.xl,
   },
+
   card: {
     padding: SPACING.lg,
     borderRadius: RADIUS.cards,
     backgroundColor: PALETTE.carbonMist,
     marginBottom: SPACING.lg,
   },
+
   cardLocked: {
     opacity: 0.7,
   },
+
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SPACING.lg,
   },
+
   sectionTitle: {
     ...FONT.h3,
     fontSize: 18,
     color: PALETTE.textPrimary,
     marginBottom: SPACING.lg,
   },
+
   horizontalInputs: {
     flexDirection: 'row',
     gap: SPACING.md,
   },
+
   verticalGap: {
     gap: SPACING.md,
   },
+
   inputGroup: {
     marginBottom: SPACING.md,
   },
+
   inputLabel: {
     ...FONT.caption,
     color: PALETTE.textSecondary,
     marginBottom: 8,
   },
+
   input: {
     backgroundColor: PALETTE.graphite,
     borderRadius: RADIUS.inputs,
@@ -379,36 +396,43 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: PALETTE.steelLine,
   },
+
   inputDisabled: {
     color: PALETTE.textMuted,
   },
+
   healthRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.md,
   },
+
   healthDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     marginRight: SPACING.sm,
   },
+
   healthText: {
     ...FONT.body,
     fontSize: 14,
     color: PALETTE.textSecondary,
   },
+
   secureBlockHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginBottom: 8,
   },
+
   secureBlockDesc: {
     ...FONT.body,
     color: PALETTE.textSecondary,
     marginBottom: SPACING.lg,
   },
+
   actionFooter: {
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
@@ -417,4 +441,3 @@ const styles = StyleSheet.create({
     borderTopColor: PALETTE.steelLine,
   },
 });
-

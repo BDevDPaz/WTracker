@@ -1,7 +1,7 @@
-// src/components/modals/LunchModal.tsx
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
@@ -32,9 +32,14 @@ export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
 
         <Animated.View entering={FadeInDown.duration(220)} style={styles.modalCard}>
-          <Text style={styles.title}>Deducción de Almuerzo</Text>
+          
+          <View style={styles.headerRow}>
+            <Ionicons name="restaurant-outline" size={22} color={PALETTE.mutedGold} />
+            <Text style={styles.title}>Tiempo de descanso</Text>
+          </View>
+
           <Text style={styles.subtitle}>
-            Selecciona el tiempo de descanso a descontar de la jornada actual.
+            Selecciona el tiempo que se descontará de la jornada.
           </Text>
 
           <View style={styles.optionsRow}>
@@ -53,7 +58,7 @@ export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
                     selected === min && styles.optionTextActive,
                   ]}
                 >
-                  {min}m
+                  {min} min
                 </Text>
               </Pressable>
             ))}
@@ -74,6 +79,7 @@ export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
               style={{ flex: 1 }}
             />
           </View>
+
         </Animated.View>
       </View>
     </Modal>
@@ -98,10 +104,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
 
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: SPACING.xs,
+  },
+
   title: {
     ...FONT.h2,
     color: PALETTE.textPrimary,
-    marginBottom: SPACING.xs,
   },
 
   subtitle: {
@@ -147,4 +159,3 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
 });
-
