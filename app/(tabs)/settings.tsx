@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TextInput,
   Pressable,
@@ -11,8 +10,13 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown, SlideInDown } from 'react-native-reanimated';
 import * as Crypto from 'expo-crypto';
-import { PALETTE, SPACING, RADIUS, FONT } from '../../src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../src/context/ThemeContext';
+import { getSpringConfig } from '../../src/constants/animations';
+import { SPACING, RADIUS, FONT } from '../../src/constants/theme';
+import { ScreenContainer } from '../../src/components/ui/ScreenContainer';
 import { Button } from '../../src/components/ui/Button';
 import { useToast } from '../../src/context/ToastContext';
 
@@ -21,6 +25,10 @@ const DEMO_ADMIN_PIN_SHA256 =
 
 export default function SettingsScreen() {
   const { showToast } = useToast();
+  
+  // Consumo dinámico del tema y de las físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
 
   const [isDirty, setIsDirty] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -103,61 +111,95 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <ScreenContainer noPadding>
       
       <Animated.View entering={FadeInDown.duration(400)}>
         <View style={styles.header}>
           <View style={styles.headerRow}>
-            <Ionicons name="settings-outline" size={22} color={PALETTE.textPrimary} />
-            <Text style={styles.headerTitle}>Ajustes</Text>
+            <Ionicons name="settings-outline" size={22} color={colors.textPrimary} />
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Ajustes</Text>
           </View>
 
-          <Text style={styles.headerSubtitle}>Configuración y seguridad</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            Configuración y seguridad
+          </Text>
         </View>
       </Animated.View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        <Animated.View entering={FadeInDown.delay(100).springify().damping(20)}>
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Perfil laboral</Text>
+        <Animated.View 
+          entering={FadeInDown.delay(100)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+        >
+          <View style={[styles.card, { backgroundColor: colors.carbonMist }]}>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Perfil laboral</Text>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Nombre</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Nombre</Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.graphite,
+                    borderColor: colors.steelLine,
+                    color: colors.textPrimary,
+                  }
+                ]}
                 defaultValue="Alex León"
                 onChangeText={markAsDirty}
-                placeholderTextColor={PALETTE.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Tarifa por hora</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Tarifa por hora</Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.graphite,
+                    borderColor: colors.steelLine,
+                    color: colors.textPrimary,
+                  }
+                ]}
                 defaultValue="20.00"
                 keyboardType="numeric"
                 onChangeText={markAsDirty}
-                placeholderTextColor={PALETTE.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
             </View>
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(200).springify().damping(20)}>
-          <View style={[styles.card, !isUnlocked && styles.cardLocked]}>
+        <Animated.View 
+          entering={FadeInDown.delay(200)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+        >
+          <View style={[styles.card, { backgroundColor: colors.carbonMist }, !isUnlocked && styles.cardLocked]}>
             
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.sectionTitle}>Parámetros de jornada</Text>
-              {!isUnlocked && <Ionicons name="lock-closed" size={16} color={PALETTE.mutedGold} />}
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Parámetros de jornada</Text>
+              {!isUnlocked && <Ionicons name="lock-closed" size={16} color={colors.mutedGold} />}
             </View>
 
             <View style={styles.horizontalInputs}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>Hora base</Text>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Hora base</Text>
                 <TextInput
-                  style={[styles.input, !isUnlocked && styles.inputDisabled]}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.graphite,
+                      borderColor: colors.steelLine,
+                      color: colors.textPrimary,
+                    },
+                    !isUnlocked && { color: colors.textMuted }
+                  ]}
                   defaultValue="06:00"
                   editable={isUnlocked}
                   onChangeText={markAsDirty}
@@ -165,9 +207,17 @@ export default function SettingsScreen() {
               </View>
 
               <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>Multiplicador extra</Text>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Multiplicador extra</Text>
                 <TextInput
-                  style={[styles.input, !isUnlocked && styles.inputDisabled]}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.graphite,
+                      borderColor: colors.steelLine,
+                      color: colors.textPrimary,
+                    },
+                    !isUnlocked && { color: colors.textMuted }
+                  ]}
                   defaultValue="1.5"
                   editable={isUnlocked}
                   onChangeText={markAsDirty}
@@ -178,14 +228,25 @@ export default function SettingsScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(300).springify().damping(20)}>
-          <View style={[styles.card, !hasPermissions && { borderColor: PALETTE.deepRed, borderWidth: 1 }]}>
+        <Animated.View 
+          entering={FadeInDown.delay(300)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+        >
+          <View 
+            style={[
+              styles.card, 
+              { backgroundColor: colors.carbonMist }, 
+              !hasPermissions && { borderColor: colors.deepRed, borderWidth: 1 }
+            ]}
+          >
             
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.sectionTitle}>Ubicación</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Ubicación</Text>
 
               <Pressable onPress={togglePermissionsSimulator}>
-                <Text style={{ ...FONT.label, color: PALETTE.mutedGold }}>
+                <Text style={{ ...FONT.label, color: colors.mutedGold }}>
                   Simular sistema
                 </Text>
               </Pressable>
@@ -195,10 +256,10 @@ export default function SettingsScreen() {
               <View
                 style={[
                   styles.healthDot,
-                  { backgroundColor: hasPermissions ? PALETTE.successGreen : PALETTE.deepRed },
+                  { backgroundColor: hasPermissions ? colors.successGreen : colors.deepRed },
                 ]}
               />
-              <Text style={[styles.healthText, !hasPermissions && { color: PALETTE.deepRed }]}>
+              <Text style={[styles.healthText, { color: colors.textSecondary }, !hasPermissions && { color: colors.deepRed }]}>
                 {hasPermissions
                   ? 'Permiso de ubicación activo'
                   : 'Permiso de ubicación desactivado'}
@@ -209,10 +270,10 @@ export default function SettingsScreen() {
               <View
                 style={[
                   styles.healthDot,
-                  { backgroundColor: hasPermissions ? PALETTE.successGreen : PALETTE.deepRed },
+                  { backgroundColor: hasPermissions ? colors.successGreen : colors.deepRed },
                 ]}
               />
-              <Text style={[styles.healthText, !hasPermissions && { color: PALETTE.deepRed }]}>
+              <Text style={[styles.healthText, { color: colors.textSecondary }, !hasPermissions && { color: colors.deepRed }]}>
                 {hasPermissions
                   ? 'Ubicación en segundo plano activa'
                   : 'Ubicación bloqueada'}
@@ -222,12 +283,18 @@ export default function SettingsScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(400).springify().damping(20)}>
+        <Animated.View 
+          entering={FadeInDown.delay(400)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+        >
           <View
             style={[
               styles.card,
               {
-                borderColor: isUnlocked ? PALETTE.successGreen : PALETTE.steelLine,
+                backgroundColor: colors.carbonMist,
+                borderColor: isUnlocked ? colors.successGreen : colors.steelLine,
                 borderWidth: 1,
               },
             ]}
@@ -237,7 +304,7 @@ export default function SettingsScreen() {
               <Ionicons
                 name={isUnlocked ? 'lock-open' : 'lock-closed'}
                 size={20}
-                color={isUnlocked ? PALETTE.successGreen : PALETTE.mutedGold}
+                color={isUnlocked ? colors.successGreen : colors.mutedGold}
               />
 
               <Text
@@ -245,7 +312,7 @@ export default function SettingsScreen() {
                   styles.sectionTitle,
                   {
                     marginBottom: 0,
-                    color: isUnlocked ? PALETTE.successGreen : PALETTE.mutedGold,
+                    color: isUnlocked ? colors.successGreen : colors.mutedGold,
                   },
                 ]}
               >
@@ -253,7 +320,7 @@ export default function SettingsScreen() {
               </Text>
             </View>
 
-            <Text style={styles.secureBlockDesc}>
+            <Text style={[styles.secureBlockDesc, { color: colors.textSecondary }]}>
               {isUnlocked
                 ? 'Parámetros desbloqueados'
                 : 'Esta sección requiere autenticación'}
@@ -262,9 +329,17 @@ export default function SettingsScreen() {
             {!isUnlocked ? (
               <View style={styles.verticalGap}>
                 <TextInput
-                  style={[styles.input, pinError && { borderColor: PALETTE.deepRed, borderWidth: 1 }]}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.graphite,
+                      borderColor: colors.steelLine,
+                      color: colors.textPrimary,
+                    },
+                    pinError && { borderColor: colors.deepRed, borderWidth: 1 }
+                  ]}
                   placeholder="Ingresa tu PIN"
-                  placeholderTextColor={PALETTE.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   keyboardType="numeric"
                   secureTextEntry
                   value={pin}
@@ -293,8 +368,18 @@ export default function SettingsScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <Animated.View entering={SlideInDown.delay(500).springify().damping(20)}>
-        <View style={styles.actionFooter}>
+      <Animated.View 
+        entering={SlideInDown.delay(500)
+          .springify()
+          .damping(springConfig.damping)
+          .stiffness(springConfig.stiffness)}
+      >
+        <View 
+          style={[
+            styles.actionFooter,
+            { backgroundColor: colors.obsidian, borderTopColor: colors.steelLine }
+          ]}
+        >
           <Button
             label="Guardar cambios"
             variant="primary"
@@ -304,16 +389,11 @@ export default function SettingsScreen() {
         </View>
       </Animated.View>
 
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: PALETTE.obsidian,
-  },
-
   header: {
     marginHorizontal: SPACING.xl,
     marginTop: SPACING.sm,
@@ -329,13 +409,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: PALETTE.textPrimary,
+    // Color movido al componente para inyección dinámica
   },
 
   headerSubtitle: {
     fontSize: 12,
-    color: PALETTE.textSecondary,
     marginTop: 4,
+    // Color movido al componente para inyección dinámica
   },
 
   scrollContent: {
@@ -345,8 +425,8 @@ const styles = StyleSheet.create({
   card: {
     padding: SPACING.lg,
     borderRadius: RADIUS.cards,
-    backgroundColor: PALETTE.carbonMist,
     marginBottom: SPACING.lg,
+    // BackgroundColor movido al componente
   },
 
   cardLocked: {
@@ -363,8 +443,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...FONT.h3,
     fontSize: 18,
-    color: PALETTE.textPrimary,
     marginBottom: SPACING.lg,
+    // Color movido al componente
   },
 
   horizontalInputs: {
@@ -382,23 +462,17 @@ const styles = StyleSheet.create({
 
   inputLabel: {
     ...FONT.caption,
-    color: PALETTE.textSecondary,
     marginBottom: 8,
+    // Color movido al componente
   },
 
   input: {
-    backgroundColor: PALETTE.graphite,
     borderRadius: RADIUS.inputs,
     height: 52,
     paddingHorizontal: SPACING.lg,
-    color: PALETTE.textPrimary,
     ...FONT.body,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
-  },
-
-  inputDisabled: {
-    color: PALETTE.textMuted,
+    // BackgroundColor, borderColor y color movidos al componente
   },
 
   healthRow: {
@@ -417,7 +491,7 @@ const styles = StyleSheet.create({
   healthText: {
     ...FONT.body,
     fontSize: 14,
-    color: PALETTE.textSecondary,
+    // Color movido al componente
   },
 
   secureBlockHeader: {
@@ -429,15 +503,14 @@ const styles = StyleSheet.create({
 
   secureBlockDesc: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.lg,
+    // Color movido al componente
   },
 
   actionFooter: {
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
-    backgroundColor: PALETTE.obsidian,
     borderTopWidth: 1,
-    borderTopColor: PALETTE.steelLine,
+    // BackgroundColor y borderTopColor movidos al componente
   },
 });

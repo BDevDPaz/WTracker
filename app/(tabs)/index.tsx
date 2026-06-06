@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -9,8 +9,13 @@ import Animated, {
   Easing,
   FadeInDown,
 } from 'react-native-reanimated';
-import { PALETTE, SPACING, FONT } from '../../src/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+
+// --- Context, Theme & Layout ---
+import { useTheme } from '../../src/context/ThemeContext';
+import { getSpringConfig } from '../../src/constants/animations';
+import { SPACING, FONT } from '../../src/constants/theme';
+import { ScreenContainer } from '../../src/components/ui/ScreenContainer';
 
 // --- Providers & Modals ---
 import { useToast } from '../../src/context/ToastContext';
@@ -25,7 +30,11 @@ import { SystemHealthBlock } from '../../src/components/ui/SystemHealthBlock';
 import { SessionTimeline } from '../../src/components/ui/SessionTimeline';
 
 export default function HoyScreen() {
+  // Inyección del tema y físicas globales
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
   const { showToast } = useToast();
+
   const [engineState, setEngineState] = useState<EngineState>('NO_INICIADA');
   const [currentDestination, setCurrentDestination] = useState('');
   const [isSetupModalVisible, setIsSetupModalVisible] = useState(false);
@@ -39,20 +48,20 @@ export default function HoyScreen() {
     switch (engineState) {
       case 'NO_INICIADA':
       case 'CERRADA':
-        return { icon: 'moon-outline' as const, color: PALETTE.textSecondary, glow: false };
+        return { icon: 'moon-outline' as const, color: colors.textSecondary, glow: false };
       case 'ESPERANDO_LLEGADA':
-        return { icon: 'pin-outline' as const, color: PALETTE.slateBlue, glow: false };
+        return { icon: 'pin-outline' as const, color: colors.slateBlue, glow: false };
       case 'ASINCRONIA_CHECKIN':
       case 'SALIDA_DETECTADA':
-        return { icon: 'alert-circle-outline' as const, color: PALETTE.amberWarning, glow: true };
+        return { icon: 'alert-circle-outline' as const, color: colors.amberWarning, glow: true };
       case 'NO_SHOW':
-        return { icon: 'warning' as const, color: PALETTE.deepRed, glow: true };
+        return { icon: 'warning' as const, color: colors.deepRed, glow: true };
       case 'EN_TRASLADO':
-        return { icon: 'location-outline' as const, color: PALETTE.mutedGold, glow: true };
+        return { icon: 'location-outline' as const, color: colors.mutedGold, glow: true };
       case 'ACTIVA':
-        return { icon: 'location' as const, color: PALETTE.mutedGold, glow: true };
+        return { icon: 'location' as const, color: colors.mutedGold, glow: true };
       default:
-        return { icon: 'moon-outline' as const, color: PALETTE.textSecondary, glow: false };
+        return { icon: 'moon-outline' as const, color: colors.textSecondary, glow: false };
     }
   };
 
@@ -136,17 +145,21 @@ export default function HoyScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <ScreenContainer noPadding>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>W Tracker</Text>
-            <Text style={styles.headerSubtitle}>Control diario</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>W Tracker</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>Control diario</Text>
           </View>
 
           <Animated.View
             style={[
               styles.statusOrb,
+              {
+                backgroundColor: colors.carbonMist,
+                borderColor: colors.steelLine,
+              },
               orb.glow && { shadowColor: orb.color, shadowRadius: 10, elevation: 6 },
               animatedOrbStyle,
             ]}
@@ -155,7 +168,13 @@ export default function HoyScreen() {
           </Animated.View>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(50).springify().damping(20)} style={styles.heroWrapper}>
+        <Animated.View 
+          entering={FadeInDown.delay(50)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)} 
+          style={styles.heroWrapper}
+        >
           <OperationalHeroCard
             state={engineState}
             destination={currentDestination || undefined}
@@ -209,15 +228,11 @@ export default function HoyScreen() {
           setIsLunchModalVisible(true);
         }}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: PALETTE.obsidian,
-  },
   scrollContent: {
     paddingBottom: 40,
   },
@@ -233,24 +248,23 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: PALETTE.textPrimary,
+    // Color movido al componente para inyección dinámica
   },
   headerSubtitle: {
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 2,
-    color: PALETTE.textSecondary,
     marginTop: 2,
+    // Color movido al componente para inyección dinámica
   },
   statusOrb: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: PALETTE.carbonMist,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
     justifyContent: 'center',
     alignItems: 'center',
+    // BackgroundColor y borderColor movidos al componente para inyección dinámica
   },
   heroWrapper: {
     marginBottom: SPACING.lg,

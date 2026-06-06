@@ -2,7 +2,11 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
 interface DeleteSessionModalProps {
@@ -16,6 +20,10 @@ export function DeleteSessionModal({
   onCancel,
   onConfirm,
 }: DeleteSessionModalProps) {
+  // Consumo dinámico del tema y de las físicas centralizadas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   return (
     <Modal
       visible={visible}
@@ -28,22 +36,32 @@ export function DeleteSessionModal({
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
 
         <Animated.View
-          entering={FadeInDown.duration(220)}
-          style={styles.modalCard}
+          entering={FadeInDown.springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+          style={[
+            styles.modalCard,
+            {
+              backgroundColor: colors.carbonMist,
+              borderColor: colors.steelLine,
+            },
+          ]}
         >
           <View style={styles.alertHeader}>
             <View style={styles.iconWrapper}>
               <Ionicons
                 name="trash-bin-outline"
                 size={24}
-                color={PALETTE.deepRed}
+                color={colors.deepRed}
               />
             </View>
 
-            <Text style={styles.title}>Eliminar jornada</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>
+              Eliminar jornada
+            </Text>
           </View>
 
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Esta acción es irreversible. Se eliminarán permanentemente todos los
             eventos, registros de tiempo y cálculos asociados a esta jornada.
           </Text>
@@ -72,19 +90,18 @@ export function DeleteSessionModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)', // Velo oscuro estructural estático
     justifyContent: 'flex-end',
   },
 
   modalCard: {
-    backgroundColor: PALETTE.carbonMist,
     borderTopLeftRadius: RADIUS.cards,
     borderTopRightRadius: RADIUS.cards,
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
     borderBottomWidth: 0,
+    // BackgroundColor y borderColor se aplican dinámicamente en el JSX
   },
 
   alertHeader: {
@@ -98,21 +115,21 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(235, 87, 87, 0.1)',
+    backgroundColor: 'rgba(235, 87, 87, 0.1)', // Fondo translúcido estático para el peligro
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   title: {
     ...FONT.h2,
-    color: PALETTE.textPrimary,
+    // Color se aplica dinámicamente en el JSX
   },
 
   subtitle: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.xl,
     lineHeight: 22,
+    // Color se aplica dinámicamente en el JSX
   },
 
   footer: {

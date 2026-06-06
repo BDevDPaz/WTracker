@@ -11,7 +11,11 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
 interface EditSessionModalProps {
@@ -25,6 +29,10 @@ export function EditSessionModal({
   onCancel,
   onSave,
 }: EditSessionModalProps) {
+  // Consumo dinámico del tema y físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   const [inTime, setInTime] = useState('04:56 PM');
   const [outTime, setOutTime] = useState('06:34 PM');
   const [note, setNote] = useState('');
@@ -60,34 +68,44 @@ export function EditSessionModal({
           extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
         >
           <Animated.View
-            entering={FadeInDown.duration(220)}
-            style={styles.modalCard}
+            entering={FadeInDown.springify()
+              .damping(springConfig.damping)
+              .stiffness(springConfig.stiffness)}
+            style={[
+              styles.modalCard,
+              {
+                backgroundColor: colors.carbonMist,
+                borderColor: colors.steelLine,
+              },
+            ]}
           >
             <View style={styles.headerRow}>
-              <Ionicons name="create-outline" size={20} color={PALETTE.mutedGold} />
-              <Text style={styles.title}>Editar jornada</Text>
+              <Ionicons name="create-outline" size={20} color={colors.mutedGold} />
+              <Text style={[styles.title, { color: colors.textPrimary }]}>
+                Editar jornada
+              </Text>
             </View>
 
-            <Text style={styles.subtitle}>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Ajusta los horarios registrados de esta jornada.
             </Text>
 
             {isCorrupted ? (
-              <View style={styles.warningBanner}>
-                <Ionicons name="warning-outline" size={16} color={PALETTE.deepRed} />
-                <Text style={styles.warningText}>
+              <View style={[styles.warningBanner, { borderColor: colors.deepRed }]}>
+                <Ionicons name="warning-outline" size={16} color={colors.deepRed} />
+                <Text style={[styles.warningText, { color: colors.deepRed }]}>
                   Se detectaron datos inválidos. Ingresa horarios correctos.
                 </Text>
               </View>
             ) : (
               inTime !== '04:56 PM' && (
-                <View style={styles.infoBanner}>
+                <View style={[styles.infoBanner, { borderColor: colors.mutedGold }]}>
                   <Ionicons
                     name="alert-circle-outline"
                     size={16}
-                    color={PALETTE.mutedGold}
+                    color={colors.mutedGold}
                   />
-                  <Text style={styles.infoText}>
+                  <Text style={[styles.infoText, { color: colors.mutedGold }]}>
                     El cálculo de la jornada será actualizado.
                   </Text>
                 </View>
@@ -96,34 +114,64 @@ export function EditSessionModal({
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, styles.leftColumn]}>
-                <Text style={styles.label}>Hora de inicio</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>
+                  Hora de inicio
+                </Text>
                 <TextInput
-                  style={[styles.input, isCorrupted && styles.inputError]}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.graphite,
+                      borderColor: colors.steelLine,
+                      color: colors.textPrimary,
+                    },
+                    isCorrupted && { borderColor: colors.deepRed },
+                  ]}
                   value={inTime}
                   onChangeText={setInTime}
                   placeholder="08:00 AM"
-                  placeholderTextColor={PALETTE.textMuted}
+                  placeholderTextColor={colors.textMuted}
                 />
               </View>
 
               <View style={[styles.inputGroup, styles.rightColumn]}>
-                <Text style={styles.label}>Hora de fin</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>
+                  Hora de fin
+                </Text>
                 <TextInput
-                  style={[styles.input, isCorrupted && styles.inputError]}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.graphite,
+                      borderColor: colors.steelLine,
+                      color: colors.textPrimary,
+                    },
+                    isCorrupted && { borderColor: colors.deepRed },
+                  ]}
                   value={outTime}
                   onChangeText={setOutTime}
                   placeholder="05:00 PM"
-                  placeholderTextColor={PALETTE.textMuted}
+                  placeholderTextColor={colors.textMuted}
                 />
               </View>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Motivo del ajuste</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>
+                Motivo del ajuste
+              </Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={[
+                  styles.input,
+                  styles.textArea,
+                  {
+                    backgroundColor: colors.graphite,
+                    borderColor: colors.steelLine,
+                    color: colors.textPrimary,
+                  },
+                ]}
                 placeholder="Describe el motivo del cambio..."
-                placeholderTextColor={PALETTE.textMuted}
+                placeholderTextColor={colors.textMuted}
                 value={note}
                 onChangeText={setNote}
                 multiline
@@ -147,7 +195,6 @@ export function EditSessionModal({
                 disabled={!note.trim() || isCorrupted}
               />
             </View>
-
           </Animated.View>
         </KeyboardAwareScrollView>
       </View>
@@ -158,7 +205,7 @@ export function EditSessionModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)', // Estructural
   },
 
   scrollContainer: {
@@ -167,14 +214,13 @@ const styles = StyleSheet.create({
   },
 
   modalCard: {
-    backgroundColor: PALETTE.carbonMist,
     borderTopLeftRadius: RADIUS.cards,
     borderTopRightRadius: RADIUS.cards,
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
     borderBottomWidth: 0,
+    // backgroundColor y borderColor se aplican dinámicamente en el JSX
   },
 
   headerRow: {
@@ -186,49 +232,49 @@ const styles = StyleSheet.create({
 
   title: {
     ...FONT.h2,
-    color: PALETTE.textPrimary,
+    // color se aplica dinámicamente en el JSX
   },
 
   subtitle: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.lg,
+    // color se aplica dinámicamente en el JSX
   },
 
   warningBanner: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(235, 87, 87, 0.1)',
+    backgroundColor: 'rgba(235, 87, 87, 0.1)', // Fondo de advertencia estático
     padding: SPACING.md,
     borderRadius: RADIUS.inputs,
     borderWidth: 1,
-    borderColor: PALETTE.deepRed,
     marginBottom: SPACING.lg,
     alignItems: 'center',
     gap: SPACING.sm,
+    // borderColor se aplica dinámicamente en el JSX
   },
 
   warningText: {
     ...FONT.caption,
-    color: PALETTE.deepRed,
     flex: 1,
+    // color se aplica dinámicamente en el JSX
   },
 
   infoBanner: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    backgroundColor: 'rgba(212, 175, 55, 0.1)', // Fondo de info estático
     padding: SPACING.md,
     borderRadius: RADIUS.inputs,
     borderWidth: 1,
-    borderColor: PALETTE.mutedGold,
     marginBottom: SPACING.lg,
     alignItems: 'center',
     gap: SPACING.sm,
+    // borderColor se aplica dinámicamente en el JSX
   },
 
   infoText: {
     ...FONT.caption,
-    color: PALETTE.mutedGold,
     flex: 1,
+    // color se aplica dinámicamente en el JSX
   },
 
   row: {
@@ -251,23 +297,17 @@ const styles = StyleSheet.create({
 
   label: {
     ...FONT.caption,
-    color: PALETTE.textSecondary,
     marginBottom: 8,
+    // color se aplica dinámicamente en el JSX
   },
 
   input: {
-    backgroundColor: PALETTE.graphite,
     borderRadius: RADIUS.inputs,
     height: 52,
     paddingHorizontal: SPACING.lg,
-    color: PALETTE.textPrimary,
     ...FONT.body,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
-  },
-
-  inputError: {
-    borderColor: PALETTE.deepRed,
+    // backgroundColor, borderColor y color se aplican dinámicamente en el JSX
   },
 
   textArea: {

@@ -2,7 +2,7 @@
   "expo": {
     "name": "W Tracker",
     "slug": "wtracker",
-    "version": "1.0.0",
+    "version": "2.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "wtracker",
@@ -10,16 +10,18 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#050505"
+      "backgroundColor": "#0A0A0C"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wtracker.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#050505"
-      }
+        "backgroundColor": "#0A0A0C"
+      },
+      "package": "com.wtracker.app"
     },
     "web": {
       "bundler": "metro",

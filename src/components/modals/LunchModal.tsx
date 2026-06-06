@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
 interface LunchModalProps {
@@ -12,6 +16,10 @@ interface LunchModalProps {
 }
 
 export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
+  // Consumo dinámico del tema y de las físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   const [selected, setSelected] = useState(30);
 
   useEffect(() => {
@@ -31,14 +39,27 @@ export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
       <View style={styles.overlay}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
 
-        <Animated.View entering={FadeInDown.duration(220)} style={styles.modalCard}>
+        <Animated.View 
+          entering={FadeInDown.springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)} 
+          style={[
+            styles.modalCard,
+            {
+              backgroundColor: colors.carbonMist,
+              borderColor: colors.steelLine,
+            }
+          ]}
+        >
           
           <View style={styles.headerRow}>
-            <Ionicons name="restaurant-outline" size={22} color={PALETTE.mutedGold} />
-            <Text style={styles.title}>Tiempo de descanso</Text>
+            <Ionicons name="restaurant-outline" size={22} color={colors.mutedGold} />
+            <Text style={[styles.title, { color: colors.textPrimary }]}>
+              Tiempo de descanso
+            </Text>
           </View>
 
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Selecciona el tiempo que se descontará de la jornada.
           </Text>
 
@@ -49,13 +70,21 @@ export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
                 onPress={() => setSelected(min)}
                 style={[
                   styles.optionPill,
-                  selected === min && styles.optionPillActive,
+                  {
+                    backgroundColor: colors.graphite,
+                    borderColor: colors.steelLine,
+                  },
+                  selected === min && [
+                    styles.optionPillActive, 
+                    { borderColor: colors.mutedGold }
+                  ],
                 ]}
               >
                 <Text
                   style={[
                     styles.optionText,
-                    selected === min && styles.optionTextActive,
+                    { color: colors.textSecondary },
+                    selected === min && { color: colors.mutedGold },
                   ]}
                 >
                   {min} min
@@ -89,19 +118,18 @@ export function LunchModal({ visible, onCancel, onConfirm }: LunchModalProps) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)', // Velo oscuro estructural estático
     justifyContent: 'flex-end',
   },
 
   modalCard: {
-    backgroundColor: PALETTE.carbonMist,
     borderTopLeftRadius: RADIUS.cards,
     borderTopRightRadius: RADIUS.cards,
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
     borderBottomWidth: 0,
+    // backgroundColor y borderColor aplicados dinámicamente en el JSX
   },
 
   headerRow: {
@@ -113,14 +141,14 @@ const styles = StyleSheet.create({
 
   title: {
     ...FONT.h2,
-    color: PALETTE.textPrimary,
+    // Color aplicado dinámicamente en el JSX
   },
 
   subtitle: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.xl,
     lineHeight: 22,
+    // Color aplicado dinámicamente en el JSX
   },
 
   optionsRow: {
@@ -134,24 +162,19 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     paddingVertical: 14,
     alignItems: 'center',
-    backgroundColor: PALETTE.graphite,
     borderRadius: RADIUS.inputs,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+    // backgroundColor y borderColor aplicados dinámicamente en el JSX
   },
 
   optionPillActive: {
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    borderColor: PALETTE.mutedGold,
+    backgroundColor: 'rgba(212, 175, 55, 0.1)', // Fondo translúcido estático para selección activa
+    // borderColor aplicado dinámicamente en el JSX
   },
 
   optionText: {
     ...FONT.bodyStrong,
-    color: PALETTE.textSecondary,
-  },
-
-  optionTextActive: {
-    color: PALETTE.mutedGold,
+    // Color aplicado dinámicamente en el JSX
   },
 
   footer: {

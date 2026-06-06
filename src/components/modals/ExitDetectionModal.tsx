@@ -2,7 +2,11 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
 interface ExitDetectionModalProps {
@@ -18,6 +22,10 @@ export function ExitDetectionModal({
   onContinueOperating,
   onCloseShift,
 }: ExitDetectionModalProps) {
+  // Consumo dinámico del tema y físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   return (
     <Modal
       visible={visible}
@@ -30,25 +38,37 @@ export function ExitDetectionModal({
         <Pressable style={StyleSheet.absoluteFill} onPress={onContinueOperating} />
 
         <Animated.View
-          entering={FadeInDown.duration(220)}
-          style={styles.modalCard}
+          entering={FadeInDown.springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+          style={[
+            styles.modalCard,
+            {
+              backgroundColor: colors.carbonMist,
+              borderColor: colors.steelLine,
+            },
+          ]}
         >
           <View style={styles.alertHeader}>
             <View style={styles.iconWrapper}>
               <Ionicons
                 name="warning-outline"
                 size={24}
-                color={PALETTE.amberWarning}
+                color={colors.amberWarning}
               />
             </View>
 
-            <Text style={styles.title}>Salida de zona detectada</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>
+              Salida de zona detectada
+            </Text>
           </View>
 
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Se detectó una salida de la zona registrada a las{' '}
-            <Text style={styles.timeHighlight}>{exitTime}</Text>.  
-            ¿Deseas continuar con la jornada o finalizarla?
+            <Text style={[styles.timeHighlight, { color: colors.amberWarning }]}>
+              {exitTime}
+            </Text>
+            . ¿Deseas continuar con la jornada o finalizarla?
           </Text>
 
           <View style={styles.footer}>
@@ -75,19 +95,18 @@ export function ExitDetectionModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)', // Velo oscuro estructural
     justifyContent: 'flex-end',
   },
 
   modalCard: {
-    backgroundColor: PALETTE.carbonMist,
     borderTopLeftRadius: RADIUS.cards,
     borderTopRightRadius: RADIUS.cards,
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
     borderBottomWidth: 0,
+    // backgroundColor y borderColor se aplican dinámicamente en el JSX
   },
 
   alertHeader: {
@@ -101,26 +120,26 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(242, 153, 74, 0.1)',
+    backgroundColor: 'rgba(242, 153, 74, 0.1)', // Fondo de advertencia translúcido estático
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   title: {
     ...FONT.h2,
-    color: PALETTE.textPrimary,
+    // Color se aplica dinámicamente en el JSX
   },
 
   subtitle: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.xl,
     lineHeight: 22,
+    // Color se aplica dinámicamente en el JSX
   },
 
   timeHighlight: {
     ...FONT.bodyStrong,
-    color: PALETTE.amberWarning,
+    // Color se aplica dinámicamente en el JSX
   },
 
   footer: {

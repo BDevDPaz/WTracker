@@ -8,7 +8,10 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
-import { PALETTE, FONT, RADIUS } from '../../constants/theme';
+
+// Importaciones actualizadas según la arquitectura de contexto
+import { useTheme } from '../../context/ThemeContext';
+import { FONT, RADIUS } from '../../constants/theme';
 
 type AppBrandTitleProps = {
   subtitle?: string;
@@ -17,6 +20,9 @@ type AppBrandTitleProps = {
 export function AppBrandTitle({
   subtitle = 'CONTROL DE JORNADA',
 }: AppBrandTitleProps) {
+  // Consumo dinámico del tema centralizado
+  const { colors } = useTheme();
+
   const glowOpacity = useSharedValue(0.14);
   const glowScale = useSharedValue(1);
   const lineScale = useSharedValue(0.35);
@@ -83,19 +89,33 @@ export function AppBrandTitle({
       
       <Animated.View style={[styles.titleRow, titleAnimatedStyle]}>
         <View style={styles.wordmarkWrap}>
-          <Animated.View style={[styles.accentGlow, accentAnimatedStyle]} />
+          <Animated.View 
+            style={[
+              styles.accentGlow, 
+              accentAnimatedStyle, 
+              { backgroundColor: colors.mutedGold }
+            ]} 
+          />
 
-          <Text style={styles.title}>
-            <Text style={styles.titleAccent}>W</Text>
-            <Text style={styles.titleMain}>Tracker</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
+            <Text style={[styles.titleAccent, { color: colors.mutedGold }]}>W</Text>
+            <Text style={[styles.titleMain, { color: colors.textPrimary }]}>Tracker</Text>
           </Text>
         </View>
       </Animated.View>
 
-      <Text style={styles.subtitle}>{subtitle}</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        {subtitle}
+      </Text>
 
       <View style={styles.lineTrack}>
-        <Animated.View style={[styles.lineAccent, lineAnimatedStyle]} />
+        <Animated.View 
+          style={[
+            styles.lineAccent, 
+            lineAnimatedStyle, 
+            { backgroundColor: colors.mutedGold }
+          ]} 
+        />
       </View>
 
     </View>
@@ -124,22 +144,22 @@ const styles = StyleSheet.create({
     width: 44,
     height: 26,
     borderRadius: RADIUS.inputs,
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    // BackgroundColor inyectado dinámicamente en el JSX
   },
 
   title: {
     fontSize: 30,
     fontWeight: '800',
     letterSpacing: -0.4,
-    color: PALETTE.textPrimary,
+    // Color inyectado dinámicamente en el JSX
   },
 
   titleAccent: {
-    color: PALETTE.mutedGold,
+    // Color inyectado dinámicamente en el JSX
   },
 
   titleMain: {
-    color: PALETTE.textPrimary,
+    // Color inyectado dinámicamente en el JSX
   },
 
   subtitle: {
@@ -148,14 +168,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 2,
-    color: PALETTE.textSecondary,
+    // Color inyectado dinámicamente en el JSX
   },
 
   lineTrack: {
     marginTop: 10,
     height: 2,
     width: 120,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(255,255,255,0.06)', // Riel estructural estático
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -164,6 +184,6 @@ const styles = StyleSheet.create({
     height: 2,
     width: '100%',
     borderRadius: 2,
-    backgroundColor: PALETTE.mutedGold,
+    // BackgroundColor inyectado dinámicamente en el JSX
   },
 });

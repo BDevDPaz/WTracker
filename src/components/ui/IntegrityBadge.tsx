@@ -1,8 +1,12 @@
 import React from 'react';
 import { Text, StyleSheet, View } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
-import { PALETTE, FONT } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { FONT } from '../../constants/theme';
 
 export type BadgeType = 'valid' | 'manual' | 'auto' | 'warning' | 'error';
 
@@ -11,47 +15,46 @@ interface IntegrityBadgeProps {
 }
 
 export function IntegrityBadge({ type }: IntegrityBadgeProps) {
+  // Inyección de tokens dinámicos y configuración de animaciones
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   const getConfig = () => {
     switch (type) {
       case 'valid':
         return {
           label: 'Correcto',
-          color: PALETTE.successGreen,
+          color: colors.successGreen,
           icon: 'checkmark-circle-outline' as const,
         };
-
       case 'manual':
         return {
           label: 'Ajustado',
-          color: PALETTE.textSecondary,
+          color: colors.textSecondary,
           icon: 'create-outline' as const,
         };
-
       case 'auto':
         return {
           label: 'Automático',
-          color: PALETTE.slateBlue,
+          color: colors.slateBlue,
           icon: 'time-outline' as const,
         };
-
       case 'warning':
         return {
           label: 'Revisar',
-          color: PALETTE.amberWarning,
+          color: colors.amberWarning,
           icon: 'warning-outline' as const,
         };
-
       case 'error':
         return {
           label: 'Error',
-          color: PALETTE.deepRed,
+          color: colors.deepRed,
           icon: 'alert-circle-outline' as const,
         };
-
       default:
         return {
           label: 'Desconocido',
-          color: PALETTE.textMuted,
+          color: colors.textMuted,
           icon: 'help-circle-outline' as const,
         };
     }
@@ -61,7 +64,9 @@ export function IntegrityBadge({ type }: IntegrityBadgeProps) {
 
   return (
     <Animated.View
-      layout={LinearTransition.springify().damping(20)}
+      layout={LinearTransition.springify()
+        .damping(springConfig.damping)
+        .stiffness(springConfig.stiffness)}
       style={[styles.badge, { borderColor: config.color }]}
     >
       <Ionicons
@@ -86,7 +91,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.2)', // El fondo translúcido estructural se mantiene estático
     alignSelf: 'flex-start',
   },
 

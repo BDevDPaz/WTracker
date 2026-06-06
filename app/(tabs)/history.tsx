@@ -4,14 +4,18 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  SafeAreaView,
   Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, RADIUS, SPACING, FONT } from '../../src/constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../src/context/ThemeContext';
+import { getSpringConfig } from '../../src/constants/animations';
+import { RADIUS, SPACING, FONT } from '../../src/constants/theme';
 import { IntegrityBadge, BadgeType } from '../../src/components/ui/IntegrityBadge';
+import { ScreenContainer } from '../../src/components/ui/ScreenContainer';
 
 const MOCK_HISTORY = [
   {
@@ -65,33 +69,43 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function HistoryScreen() {
   const router = useRouter();
+  // Inyección del tema y físicas globales
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+  
   const [filter, setFilter] = useState<'Todos' | 'Semana' | 'Mes'>('Todos');
 
   const renderItem = ({ item, index }: any) => {
     return (
       <AnimatedPressable
-        entering={FadeInDown.delay(index * 100 + 200).springify().damping(20)}
+        entering={FadeInDown.delay(index * 100 + 200)
+          .springify()
+          .damping(springConfig.damping)
+          .stiffness(springConfig.stiffness)}
         style={({ pressed }: { pressed: boolean }) => [
           styles.sessionCard,
           {
+            backgroundColor: colors.carbonMist,
+            borderColor: colors.steelLine,
             opacity: pressed ? 0.9 : 1,
             transform: [{ scale: pressed ? 0.98 : 1 }],
           },
-          item.status === 'error' && styles.errorCard,
+          item.status === 'error' && { borderColor: colors.deepRed },
         ]}
         onPress={() => router.push(`/session/${item.id}`)}
       >
         <View style={styles.cardTopRow}>
-          <Text style={styles.sessionDate}>{item.date}</Text>
+          <Text style={[styles.sessionDate, { color: colors.textSecondary }]}>{item.date}</Text>
           <IntegrityBadge type={item.status} />
         </View>
 
         <View style={styles.destinationRow}>
-          <Ionicons name="location-outline" size={16} color={PALETTE.textSecondary} />
+          <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
           <Text
             style={[
               styles.destinationTitle,
-              item.status === 'error' && styles.errorText,
+              { color: colors.textPrimary },
+              item.status === 'error' && { color: colors.deepRed },
             ]}
             numberOfLines={1}
           >
@@ -99,20 +113,21 @@ export default function HistoryScreen() {
           </Text>
         </View>
 
-        <Text style={styles.timeText}>{item.time}</Text>
+        <Text style={[styles.timeText, { color: colors.textSecondary }]}>{item.time}</Text>
 
-        <View style={styles.cardBottomRow}>
+        <View style={[styles.cardBottomRow, { borderTopColor: colors.graphite }]}>
           <View style={styles.metricRow}>
-            <Ionicons name="time-outline" size={14} color={PALETTE.textSecondary} />
-            <Text style={styles.hoursText}>{item.hours}</Text>
+            <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+            <Text style={[styles.hoursText, { color: colors.textPrimary }]}>{item.hours}</Text>
           </View>
 
           <View style={styles.metricRow}>
-            <Ionicons name="cash-outline" size={14} color={PALETTE.mutedGold} />
+            <Ionicons name="cash-outline" size={14} color={colors.mutedGold} />
             <Text
               style={[
                 styles.earningsText,
-                item.status === 'error' && styles.errorText,
+                { color: colors.mutedGold },
+                item.status === 'error' && { color: colors.deepRed },
               ]}
             >
               {item.earnings}
@@ -124,14 +139,14 @@ export default function HistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <ScreenContainer noPadding>
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <View style={styles.headerRow}>
-          <Ionicons name="time-outline" size={22} color={PALETTE.textPrimary} />
-          <Text style={styles.headerTitle}>Historial</Text>
+          <Ionicons name="time-outline" size={22} color={colors.textPrimary} />
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Historial</Text>
         </View>
 
-        <Text style={styles.headerSubtitle}>Actividad registrada</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>Actividad registrada</Text>
       </Animated.View>
 
       <Animated.View
@@ -143,14 +158,19 @@ export default function HistoryScreen() {
             key={f}
             style={[
               styles.filterPill,
-              filter === f && styles.filterPillActive,
+              {
+                backgroundColor: colors.graphite,
+                borderColor: colors.steelLine,
+              },
+              filter === f && [styles.filterPillActive, { borderColor: colors.mutedGold }],
             ]}
             onPress={() => setFilter(f as any)}
           >
             <Text
               style={[
                 styles.filterText,
-                filter === f && styles.filterTextActive,
+                { color: colors.textSecondary },
+                filter === f && { color: colors.mutedGold },
               ]}
             >
               {f}
@@ -167,16 +187,11 @@ export default function HistoryScreen() {
         showsVerticalScrollIndicator={false}
         ListFooterComponent={<View style={styles.footerSpacing} />}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: PALETTE.obsidian,
-  },
-
   header: {
     marginHorizontal: SPACING.xl,
     marginTop: SPACING.sm,
@@ -192,13 +207,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: PALETTE.textPrimary,
+    // Color aplicado dinámicamente
   },
 
   headerSubtitle: {
     fontSize: 12,
-    color: PALETTE.textSecondary,
     marginTop: 4,
+    // Color aplicado dinámicamente
   },
 
   filterContainer: {
@@ -212,24 +227,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: RADIUS.round,
-    backgroundColor: PALETTE.graphite,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+    // BackgroundColor y borderColor aplicados dinámicamente
   },
 
   filterPillActive: {
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    borderColor: PALETTE.mutedGold,
+    backgroundColor: 'rgba(212, 175, 55, 0.1)', // Fondo de acento estático translúcido
+    // BorderColor aplicado dinámicamente
   },
 
   filterText: {
     ...FONT.bodyStrong,
-    color: PALETTE.textSecondary,
     fontSize: 14,
-  },
-
-  filterTextActive: {
-    color: PALETTE.mutedGold,
+    // Color aplicado dinámicamente
   },
 
   scrollContent: {
@@ -237,16 +247,11 @@ const styles = StyleSheet.create({
   },
 
   sessionCard: {
-    backgroundColor: PALETTE.carbonMist,
     borderRadius: RADIUS.cards,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
-  },
-
-  errorCard: {
-    borderColor: PALETTE.deepRed,
+    // BackgroundColor y borderColor aplicados dinámicamente
   },
 
   cardTopRow: {
@@ -258,7 +263,7 @@ const styles = StyleSheet.create({
 
   sessionDate: {
     ...FONT.label,
-    color: PALETTE.textSecondary,
+    // Color aplicado dinámicamente
   },
 
   destinationRow: {
@@ -271,18 +276,14 @@ const styles = StyleSheet.create({
   destinationTitle: {
     ...FONT.h3,
     fontSize: 18,
-    color: PALETTE.textPrimary,
     flex: 1,
-  },
-
-  errorText: {
-    color: PALETTE.deepRed,
+    // Color aplicado dinámicamente
   },
 
   timeText: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.md,
+    // Color aplicado dinámicamente
   },
 
   cardBottomRow: {
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: PALETTE.graphite,
+    // BorderTopColor aplicado dinámicamente
   },
 
   metricRow: {
@@ -302,13 +303,13 @@ const styles = StyleSheet.create({
 
   hoursText: {
     ...FONT.bodyStrong,
-    color: PALETTE.textPrimary,
+    // Color aplicado dinámicamente
   },
 
   earningsText: {
     fontSize: 16,
     fontWeight: '700',
-    color: PALETTE.mutedGold,
+    // Color aplicado dinámicamente
   },
 
   footerSpacing: {

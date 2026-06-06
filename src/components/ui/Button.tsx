@@ -17,7 +17,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
+
+// Importaciones del sistema de diseño y contexto
+import { useTheme } from '../../context/ThemeContext';
+import { RADIUS, FONT, SPACING } from '../../constants/theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
@@ -43,6 +46,8 @@ export function Button({
   iconName,
   ...props
 }: ButtonProps) {
+  // Consumo dinámico del tema centralizado
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
   const isDisabled = disabled || isLoading;
 
@@ -54,8 +59,8 @@ export function Button({
     event: Parameters<NonNullable<PressableProps['onPressIn']>>[0]
   ) => {
     if (!isDisabled) {
+      // Micro-interacción elástica de presión adaptada al diseño táctil premium
       scale.value = withSpring(0.96, { damping: 20, stiffness: 300 });
-
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
@@ -70,7 +75,6 @@ export function Button({
     event: Parameters<NonNullable<PressableProps['onPressOut']>>[0]
   ) => {
     scale.value = withSpring(1, { damping: 20, stiffness: 300 });
-
     if (onPressOut) {
       onPressOut(event);
     }
@@ -100,27 +104,27 @@ export function Button({
     switch (variant) {
       case 'primary':
         return {
-          backgroundColor: PALETTE.mutedGold,
-          textColor: PALETTE.obsidian,
-          borderColor: PALETTE.mutedGold,
+          backgroundColor: colors.mutedGold,
+          textColor: colors.obsidian,
+          borderColor: colors.mutedGold,
         };
       case 'secondary':
         return {
           backgroundColor: 'transparent',
-          textColor: PALETTE.textPrimary,
-          borderColor: PALETTE.steelLine,
+          textColor: colors.textPrimary,
+          borderColor: colors.steelLine,
         };
       case 'danger':
         return {
-          backgroundColor: PALETTE.deepRed,
+          backgroundColor: colors.deepRed,
           textColor: '#FFFFFF',
-          borderColor: PALETTE.deepRed,
+          borderColor: colors.deepRed,
         };
       case 'ghost':
       default:
         return {
           backgroundColor: 'transparent',
-          textColor: PALETTE.textSecondary,
+          textColor: colors.textSecondary,
           borderColor: 'transparent',
         };
     }

@@ -1,4 +1,3 @@
-// src/context/ToastContext.tsx
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { StyleSheet, Text, View, Platform } from 'react-native';
 import Animated, {
@@ -9,14 +8,14 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, RADIUS, SPACING, FONT } from '../constants/theme';
-import { ICONS } from '../constants/icons'; // ✅ NUEVO
 
-export type ToastType =
-  | 'success'
-  | 'error'
-  | 'info'
-  | 'warning';
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from './ThemeContext';
+import { getSpringConfig } from '../constants/animations';
+import { RADIUS, SPACING, FONT } from '../constants/theme';
+import { ICONS } from '../constants/icons';
+
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface ToastContextType {
   showToast: (message: string, type?: ToastType) => void;
@@ -25,6 +24,10 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  // Consumo dinámico del tema centralizado y físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   const [message, setMessage] = useState('');
   const [type, setType] = useState<ToastType>('info');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -61,8 +64,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       translateY.value = withSpring(
         Platform.OS === 'ios' ? 60 : 40,
         {
-          damping: 15,
-          stiffness: 120,
+          damping: springConfig.damping,
+          stiffness: springConfig.stiffness,
         }
       );
 
@@ -70,31 +73,31 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         dismissToast();
       }, 3500);
     },
-    [translateY, opacity, dismissToast]
+    [translateY, opacity, dismissToast, springConfig]
   );
 
-  // ✅ ICONOGRAFÍA CENTRALIZADA
+  // ICONOGRAFÍA Y COLORES CENTRALIZADOS
   const getToastConfig = () => {
     switch (type) {
       case 'success':
         return {
-          color: PALETTE.successGreen,
+          color: colors.successGreen,
           icon: ICONS.system.success,
         };
       case 'error':
         return {
-          color: PALETTE.deepRed,
+          color: colors.deepRed,
           icon: ICONS.system.error,
         };
       case 'warning':
         return {
-          color: PALETTE.amberWarning,
+          color: colors.amberWarning,
           icon: ICONS.system.warning,
         };
       case 'info':
       default:
         return {
-          color: PALETTE.slateBlue,
+          color: colors.slateBlue,
           icon: ICONS.system.info,
         };
     }
@@ -109,13 +112,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {/* Contenedor Flotante del Toast */}
       {message !== '' && (
         <Animated.View style={[styles.toastContainer, animatedStyle]}>
-          <View style={[styles.toastCard, { borderColor: config.color }]}>
+          <View 
+            style={[
+              styles.toastCard, 
+              { 
+                backgroundColor: colors.carbonMist,
+                borderColor: config.color 
+              }
+            ]}
+          >
             <Ionicons
-              name={config.icon}
+              name={config.icon as keyof typeof Ionicons.glyphMap}
               size={22}
               color={config.color}
             />
-            <Text style={styles.toastText} numberOfLines={3}>
+            <Text 
+              style={[styles.toastText, { color: colors.textPrimary }]} 
+              numberOfLines={3}
+            >
               {message}
             </Text>
           </View>
@@ -149,25 +163,25 @@ const styles = StyleSheet.create({
   toastCard: {
     flexDirection: 'row',
     width: '100%',
-    backgroundColor: PALETTE.carbonMist,
     borderRadius: RADIUS.inputs,
     paddingVertical: 14,
     paddingHorizontal: SPACING.lg,
     borderWidth: 1,
     alignItems: 'center',
     gap: SPACING.md,
+    // Sombra estática para asegurar profundidad sobre la UI
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.5,
     shadowRadius: 12,
     elevation: 10,
+    // BackgroundColor y borderColor se aplican dinámicamente en el JSX
   },
   toastText: {
     ...FONT.bodyStrong,
     fontSize: 14,
-    color: PALETTE.textPrimary,
     flex: 1,
     lineHeight: 18,
+    // Color se aplica dinámicamente en el JSX
   },
 });
-

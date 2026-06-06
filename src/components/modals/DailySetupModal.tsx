@@ -11,7 +11,11 @@ import {
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { RADIUS, FONT, SPACING } from '../../constants/theme';
 import { Button } from '../ui/Button';
 
 interface DailySetupModalProps {
@@ -25,6 +29,10 @@ export function DailySetupModal({
   onCancel,
   onConfirm,
 }: DailySetupModalProps) {
+  // Consumo dinámico del tema centralizado y físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   const [dest, setDest] = useState('');
   const [addr, setAddr] = useState('');
 
@@ -47,27 +55,45 @@ export function DailySetupModal({
           extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
         >
           <Animated.View
-            entering={SlideInDown.springify().damping(22).stiffness(250)}
-            style={styles.modalCard}
+            entering={SlideInDown.springify()
+              .damping(springConfig.damping)
+              .stiffness(springConfig.stiffness)}
+            style={[
+              styles.modalCard,
+              {
+                backgroundColor: colors.carbonMist,
+                borderColor: colors.steelLine,
+              },
+            ]}
           >
             <View style={styles.headerRow}>
-              <Ionicons name="play-circle-outline" size={22} color={PALETTE.mutedGold} />
-              <Text style={styles.title}>Iniciar jornada</Text>
+              <Ionicons name="play-circle-outline" size={22} color={colors.mutedGold} />
+              <Text style={[styles.title, { color: colors.textPrimary }]}>
+                Iniciar jornada
+              </Text>
             </View>
 
-            <Text style={styles.subtitle}>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Ingresa el destino donde comenzarás la jornada.
             </Text>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Destino</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>Destino</Text>
 
-              <View style={styles.inputRow}>
-                <Ionicons name="location-outline" size={16} color={PALETTE.textSecondary} />
+              <View 
+                style={[
+                  styles.inputRow,
+                  {
+                    backgroundColor: colors.graphite,
+                    borderColor: colors.steelLine,
+                  }
+                ]}
+              >
+                <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary }]}
                   placeholder="Ej. Taller central"
-                  placeholderTextColor={PALETTE.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={dest}
                   onChangeText={setDest}
                   autoFocus
@@ -76,14 +102,22 @@ export function DailySetupModal({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Dirección (opcional)</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>Dirección (opcional)</Text>
 
-              <View style={styles.inputRow}>
-                <Ionicons name="map-outline" size={16} color={PALETTE.textSecondary} />
+              <View 
+                style={[
+                  styles.inputRow,
+                  {
+                    backgroundColor: colors.graphite,
+                    borderColor: colors.steelLine,
+                  }
+                ]}
+              >
+                <Ionicons name="map-outline" size={16} color={colors.textSecondary} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary }]}
                   placeholder="Ej. 123 Main St"
-                  placeholderTextColor={PALETTE.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   value={addr}
                   onChangeText={setAddr}
                 />
@@ -117,7 +151,7 @@ export function DailySetupModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)', // Velo oscuro estructural
   },
 
   scrollContainer: {
@@ -126,14 +160,13 @@ const styles = StyleSheet.create({
   },
 
   modalCard: {
-    backgroundColor: PALETTE.carbonMist,
     borderTopLeftRadius: RADIUS.cards,
     borderTopRightRadius: RADIUS.cards,
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
     borderBottomWidth: 0,
+    // backgroundColor y borderColor aplicados dinámicamente en el JSX
   },
 
   headerRow: {
@@ -145,13 +178,13 @@ const styles = StyleSheet.create({
 
   title: {
     ...FONT.h2,
-    color: PALETTE.textPrimary,
+    // Color aplicado dinámicamente en el JSX
   },
 
   subtitle: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.xl,
+    // Color aplicado dinámicamente en el JSX
   },
 
   inputGroup: {
@@ -160,26 +193,25 @@ const styles = StyleSheet.create({
 
   label: {
     ...FONT.caption,
-    color: PALETTE.textSecondary,
     marginBottom: 8,
+    // Color aplicado dinámicamente en el JSX
   },
 
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: PALETTE.graphite,
     borderRadius: RADIUS.inputs,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
     paddingHorizontal: SPACING.md,
+    // backgroundColor y borderColor aplicados dinámicamente en el JSX
   },
 
   input: {
     flex: 1,
     height: 52,
-    color: PALETTE.textPrimary,
     ...FONT.body,
+    // Color aplicado dinámicamente en el JSX
   },
 
   footer: {

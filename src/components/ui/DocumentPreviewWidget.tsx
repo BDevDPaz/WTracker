@@ -1,7 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { PALETTE, RADIUS, SPACING, FONT } from '../../constants/theme';
+
+// Importaciones actualizadas según la arquitectura de contexto
+import { useTheme } from '../../context/ThemeContext';
+import { RADIUS, SPACING, FONT } from '../../constants/theme';
 
 interface DocumentPreviewWidgetProps {
   employeeName: string;
@@ -16,16 +19,21 @@ export function DocumentPreviewWidget({
   totalHours,
   totalEarnings,
 }: DocumentPreviewWidgetProps) {
+  // Consumimos los colores dinámicos de la app
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
       
-      {/* Header */}
+      {/* Header temático dinámico */}
       <View style={styles.docHeader}>
-        <Ionicons name="document-text-outline" size={14} color={PALETTE.mutedGold} />
-        <Text style={styles.docHeaderText}>Vista previa del reporte</Text>
+        <Ionicons name="document-text-outline" size={14} color={colors.mutedGold} />
+        <Text style={[styles.docHeaderText, { color: colors.textSecondary }]}>
+          Vista previa del reporte
+        </Text>
       </View>
 
-      {/* Documento */}
+      {/* Documento físico simulado (Mantiene colores estáticos para efecto de papel) */}
       <View style={styles.paper}>
         
         <View style={styles.paperHeaderRow}>
@@ -84,7 +92,7 @@ const styles = StyleSheet.create({
 
   docHeaderText: {
     ...FONT.label,
-    color: PALETTE.textSecondary,
+    // El color se ha movido al componente para inyección dinámica
   },
 
   paper: {

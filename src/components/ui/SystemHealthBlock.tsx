@@ -8,15 +8,23 @@ import Animated, {
   Easing,
   FadeInDown,
 } from 'react-native-reanimated';
-import { PALETTE, RADIUS, FONT, SPACING } from '../../constants/theme';
-import { EngineState } from './OperationalHeroCard';
 import { Ionicons } from '@expo/vector-icons';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { RADIUS, FONT, SPACING } from '../../constants/theme';
+import { EngineState } from './OperationalHeroCard';
 
 interface SystemHealthBlockProps {
   engineState: EngineState;
 }
 
 export function SystemHealthBlock({ engineState }: SystemHealthBlockProps) {
+  // Inyección de tokens dinámicos
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
+
   const isTracking = ['ESPERANDO_LLEGADA', 'EN_TRASLADO', 'ACTIVA'].includes(engineState);
   const isIssue = ['ASINCRONIA_CHECKIN', 'NO_SHOW', 'SALIDA_DETECTADA'].includes(engineState);
 
@@ -32,28 +40,40 @@ export function SystemHealthBlock({ engineState }: SystemHealthBlockProps) {
     } else {
       pulseOpacity.value = withTiming(1, { duration: 300 });
     }
-  }, [isTracking]);
+  }, [isTracking, pulseOpacity]);
 
   const animatedDotStyle = useAnimatedStyle(() => ({
     opacity: pulseOpacity.value,
   }));
 
+  // Determinación dinámica de colores según el estado actual
   const gpsColor = isIssue
-    ? PALETTE.deepRed
+    ? colors.deepRed
     : isTracking
-    ? PALETTE.successGreen
-    : PALETTE.textMuted;
+    ? colors.successGreen
+    : colors.textMuted;
 
   const syncColor = isIssue
-    ? PALETTE.amberWarning
-    : PALETTE.successGreen;
+    ? colors.amberWarning
+    : colors.successGreen;
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(200).springify().damping(20)}
-      style={styles.block}
+      entering={FadeInDown.delay(200)
+        .springify()
+        .damping(springConfig.damping)
+        .stiffness(springConfig.stiffness)}
+      style={[
+        styles.block,
+        {
+          backgroundColor: colors.graphite,
+          borderColor: colors.steelLine,
+        },
+      ]}
     >
-      <Text style={styles.title}>Estado del sistema</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>
+        Estado del sistema
+      </Text>
 
       <View style={styles.row}>
         <Animated.View
@@ -67,7 +87,7 @@ export function SystemHealthBlock({ engineState }: SystemHealthBlockProps) {
           style={styles.icon}
         />
 
-        <Text style={styles.text}>
+        <Text style={[styles.text, { color: colors.textSecondary }]}>
           {isTracking
             ? 'Ubicación activa'
             : isIssue
@@ -86,7 +106,7 @@ export function SystemHealthBlock({ engineState }: SystemHealthBlockProps) {
           style={styles.icon}
         />
 
-        <Text style={styles.text}>
+        <Text style={[styles.text, { color: colors.textSecondary }]}>
           {isIssue
             ? 'Pendiente de sincronización'
             : 'Sincronización activa'}
@@ -101,17 +121,16 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.xl,
     padding: 18,
     borderRadius: RADIUS.cards,
-    backgroundColor: PALETTE.graphite,
     marginBottom: SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+    // BackgroundColor y borderColor eliminados para aplicar en el JSX (Theme)
   },
 
   title: {
     ...FONT.h3,
     fontSize: 16,
-    color: PALETTE.textPrimary,
     marginBottom: SPACING.md,
+    // Color eliminado para aplicar en el JSX (Theme)
   },
 
   row: {
@@ -133,7 +152,7 @@ const styles = StyleSheet.create({
 
   text: {
     ...FONT.body,
-    color: PALETTE.textSecondary,
     fontSize: 14,
+    // Color eliminado para aplicar en el JSX (Theme)
   },
 });

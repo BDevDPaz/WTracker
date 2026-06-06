@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
-import { PALETTE, RADIUS, SPACING, FONT } from '../../constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../context/ThemeContext';
+import { getSpringConfig } from '../../constants/animations';
+import { RADIUS, SPACING, FONT } from '../../constants/theme';
 import { Button } from './Button';
 import { StatusPill, PillStatus } from './StatusPill';
 
@@ -32,6 +36,9 @@ export function OperationalHeroCard({
   onPrimaryAction,
   onSecondaryAction,
 }: OperationalHeroCardProps) {
+  // Consumo dinámico del tema y configuración de físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
 
   const getStateConfig = () => {
     switch (state) {
@@ -122,14 +129,25 @@ export function OperationalHeroCard({
 
   return (
     <Animated.View
-      layout={LinearTransition.springify().damping(20).stiffness(200)}
-      style={styles.cardContainer}
+      layout={LinearTransition.springify()
+        .damping(springConfig.damping)
+        .stiffness(springConfig.stiffness)}
+      style={[
+        styles.cardContainer,
+        {
+          backgroundColor: colors.carbonMist,
+          borderColor: colors.steelLine,
+        },
+      ]}
     >
       <View style={styles.headerRow}>
         <StatusPill status={config.pillState} label={config.pillLabel} />
 
         {destination && (
-          <Text style={styles.destinationText} numberOfLines={1}>
+          <Text
+            style={[styles.destinationText, { color: colors.textPrimary }]}
+            numberOfLines={1}
+          >
             {destination}
           </Text>
         )}
@@ -137,13 +155,19 @@ export function OperationalHeroCard({
 
       <View style={styles.metricsRow}>
         <View style={styles.metricBlock}>
-          <Text style={styles.metricLabel}>Tiempo</Text>
-          <Text style={styles.metricBigValue}>{timeString}</Text>
+          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+            Tiempo
+          </Text>
+          <Text style={[styles.metricBigValue, { color: colors.textPrimary }]}>
+            {timeString}
+          </Text>
         </View>
 
         <View style={styles.metricBlockRight}>
-          <Text style={styles.metricLabel}>Ganancias</Text>
-          <Text style={[styles.metricBigValue, { color: PALETTE.mutedGold }]}>
+          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+            Ganancias
+          </Text>
+          <Text style={[styles.metricBigValue, { color: colors.mutedGold }]}>
             {earnings}
           </Text>
         </View>
@@ -173,11 +197,10 @@ export function OperationalHeroCard({
 const styles = StyleSheet.create({
   cardContainer: {
     marginHorizontal: SPACING.xl,
-    backgroundColor: PALETTE.carbonMist,
     borderRadius: RADIUS.cards,
     padding: SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+    // BackgroundColor y borderColor se aplican dinámicamente en el JSX
   },
 
   headerRow: {
@@ -189,10 +212,10 @@ const styles = StyleSheet.create({
 
   destinationText: {
     ...FONT.bodyStrong,
-    color: PALETTE.textPrimary,
     flex: 1,
     textAlign: 'right',
     marginLeft: SPACING.md,
+    // Color se aplica dinámicamente en el JSX
   },
 
   metricsRow: {
@@ -212,15 +235,15 @@ const styles = StyleSheet.create({
 
   metricLabel: {
     ...FONT.caption,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.xs,
+    // Color se aplica dinámicamente en el JSX
   },
 
   metricBigValue: {
     fontSize: 40,
     fontWeight: '700',
-    color: PALETTE.textPrimary,
     letterSpacing: -1,
+    // Color se aplica dinámicamente en el JSX
   },
 
   actionRow: {

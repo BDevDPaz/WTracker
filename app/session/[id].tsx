@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Pressable,
   Platform,
@@ -12,7 +11,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, { FadeInDown, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { PALETTE, RADIUS, SPACING, FONT } from '../../src/constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../src/context/ThemeContext';
+import { getSpringConfig } from '../../src/constants/animations';
+import { RADIUS, SPACING, FONT } from '../../src/constants/theme';
+import { ScreenContainer } from '../../src/components/ui/ScreenContainer';
 import { useToast } from '../../src/context/ToastContext';
 import { IntegrityBadge } from '../../src/components/ui/IntegrityBadge';
 import { Button } from '../../src/components/ui/Button';
@@ -23,6 +27,10 @@ export default function SessionDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
   const { showToast } = useToast();
+
+  // Consumo dinámico del tema y de las físicas
+  const { colors } = useTheme();
+  const springConfig = getSpringConfig();
 
   const [isEditVisible, setIsEditVisible] = useState(false);
   const [isDeleteVisible, setIsDeleteVisible] = useState(false);
@@ -51,16 +59,18 @@ export default function SessionDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <ScreenContainer noPadding>
       
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <Pressable onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="close" size={28} color={PALETTE.textPrimary} />
+          <Ionicons name="close" size={28} color={colors.textPrimary} />
         </Pressable>
 
         <View style={styles.headerCenter}>
-          <Ionicons name="document-text-outline" size={18} color={PALETTE.textPrimary} />
-          <Text style={styles.headerTitle}>Detalle de jornada</Text>
+          <Ionicons name="document-text-outline" size={18} color={colors.textPrimary} />
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
+            Detalle de jornada
+          </Text>
         </View>
 
         <View style={styles.headerSpacer} />
@@ -72,70 +82,101 @@ export default function SessionDetailScreen() {
       >
         
         <Animated.View
-          entering={FadeInDown.delay(100).springify().damping(20)}
-          style={styles.heroBlock}
+          entering={FadeInDown.delay(100)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+          style={[
+            styles.heroBlock,
+            { backgroundColor: colors.carbonMist, borderColor: colors.steelLine },
+          ]}
         >
           <View style={styles.heroTopRow}>
-            <Text style={styles.dateText}>04 jun 2026</Text>
+            <Text style={[styles.dateText, { color: colors.textSecondary }]}>04 jun 2026</Text>
             <IntegrityBadge type="valid" />
           </View>
 
           <View style={styles.destinationRow}>
-            <Ionicons name="location-outline" size={16} color={PALETTE.textSecondary} />
-            <Text style={styles.destinationText}>
+            <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
+            <Text style={[styles.destinationText, { color: colors.textPrimary }]}>
               Taller central - Revisión
             </Text>
           </View>
 
-          <Text style={styles.idText}>ID: TRK-{sessionId}-88A</Text>
+          <Text style={[styles.idText, { color: colors.textMuted }]}>ID: TRK-{sessionId}-88A</Text>
         </Animated.View>
 
         <Animated.View
-          entering={FadeInDown.delay(200).springify().damping(20)}
+          entering={FadeInDown.delay(200)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
           style={styles.metricsGrid}
         >
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>Horas totales</Text>
-            <Text style={styles.metricValue}>8.2 h</Text>
+          <View 
+            style={[
+              styles.metricCard, 
+              { backgroundColor: colors.graphite, borderColor: colors.steelLine }
+            ]}
+          >
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Horas totales</Text>
+            <Text style={[styles.metricValue, { color: colors.textPrimary }]}>8.2 h</Text>
           </View>
 
-          <View style={[styles.metricCard, styles.highlightMetricCard]}>
-            <Text style={styles.metricLabel}>Ganancias estimadas</Text>
-            <Text style={[styles.metricValue, styles.highlightMetricValue]}>
+          <View 
+            style={[
+              styles.metricCard, 
+              styles.highlightMetricCard,
+              { borderColor: colors.mutedGold }
+            ]}
+          >
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Ganancias estimadas</Text>
+            <Text style={[styles.metricValue, { color: colors.mutedGold }]}>
               $164.00
             </Text>
           </View>
         </Animated.View>
 
         <Animated.View
-          entering={FadeInDown.delay(300).springify().damping(20)}
-          style={styles.timelineBlock}
+          entering={FadeInDown.delay(300)
+            .springify()
+            .damping(springConfig.damping)
+            .stiffness(springConfig.stiffness)}
+          style={[
+            styles.timelineBlock,
+            { backgroundColor: colors.carbonMist, borderColor: colors.steelLine }
+          ]}
         >
-          <Text style={styles.sectionTitle}>Eventos de la jornada</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Eventos de la jornada</Text>
 
           <View style={styles.timelineNode}>
-            <View style={[styles.nodeDot, styles.nodeDotStart]} />
-            <View style={styles.nodeLine} />
+            <View style={[styles.nodeDot, { backgroundColor: colors.mutedGold }]} />
+            <View style={[styles.nodeLine, { backgroundColor: colors.steelLine }]} />
             <View style={styles.nodeContent}>
-              <Text style={styles.nodeTitle}>Inicio de jornada</Text>
-              <Text style={styles.nodeTime}>08:14 AM • GPS confirmado</Text>
+              <Text style={[styles.nodeTitle, { color: colors.textPrimary }]}>Inicio de jornada</Text>
+              <Text style={[styles.nodeTime, { color: colors.textSecondary }]}>08:14 AM • GPS confirmado</Text>
             </View>
           </View>
 
           <View style={styles.timelineNode}>
-            <View style={[styles.nodeDot, styles.nodeDotArrival]} />
-            <View style={styles.nodeLine} />
+            <View style={[styles.nodeDot, { backgroundColor: colors.successGreen }]} />
+            <View style={[styles.nodeLine, { backgroundColor: colors.steelLine }]} />
             <View style={styles.nodeContent}>
-              <Text style={styles.nodeTitle}>Llegada al destino</Text>
-              <Text style={styles.nodeTime}>08:45 AM • Geolocalización automática</Text>
+              <Text style={[styles.nodeTitle, { color: colors.textPrimary }]}>Llegada al destino</Text>
+              <Text style={[styles.nodeTime, { color: colors.textSecondary }]}>08:45 AM • Geolocalización automática</Text>
             </View>
           </View>
 
           <View style={styles.timelineNode}>
-            <View style={[styles.nodeDot, styles.nodeDotClose]} />
+            <View 
+              style={[
+                styles.nodeDot, 
+                { backgroundColor: colors.carbonMist, borderColor: colors.steelLine, borderWidth: 1 }
+              ]} 
+            />
             <View style={styles.nodeContent}>
-              <Text style={styles.nodeTitle}>Fin de jornada</Text>
-              <Text style={styles.nodeTime}>04:30 PM • Cierre manual</Text>
+              <Text style={[styles.nodeTitle, { color: colors.textPrimary }]}>Fin de jornada</Text>
+              <Text style={[styles.nodeTime, { color: colors.textSecondary }]}>04:30 PM • Cierre manual</Text>
             </View>
           </View>
         </Animated.View>
@@ -144,8 +185,14 @@ export default function SessionDetailScreen() {
       </ScrollView>
 
       <Animated.View
-        entering={SlideInDown.delay(400).springify().damping(20)}
-        style={styles.actionFooter}
+        entering={SlideInDown.delay(400)
+          .springify()
+          .damping(springConfig.damping)
+          .stiffness(springConfig.stiffness)}
+        style={[
+          styles.actionFooter,
+          { backgroundColor: colors.obsidian, borderTopColor: colors.steelLine }
+        ]}
       >
         <Button
           label="Editar jornada"
@@ -173,16 +220,11 @@ export default function SessionDetailScreen() {
         onCancel={() => setIsDeleteVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: PALETTE.obsidian,
-  },
-
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -206,7 +248,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...FONT.h3,
     fontSize: 18,
-    color: PALETTE.textPrimary,
+    // Color aplicado dinámicamente en el JSX
   },
 
   headerSpacer: {
@@ -218,12 +260,11 @@ const styles = StyleSheet.create({
   },
 
   heroBlock: {
-    backgroundColor: PALETTE.carbonMist,
     borderRadius: RADIUS.cards,
     padding: SPACING.xl,
     marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+    // BackgroundColor y borderColor aplicados dinámicamente
   },
 
   heroTopRow: {
@@ -235,7 +276,7 @@ const styles = StyleSheet.create({
 
   dateText: {
     ...FONT.bodyStrong,
-    color: PALETTE.textSecondary,
+    // Color aplicado dinámicamente en el JSX
   },
 
   destinationRow: {
@@ -248,13 +289,13 @@ const styles = StyleSheet.create({
   destinationText: {
     fontSize: 22,
     fontWeight: '700',
-    color: PALETTE.textPrimary,
     flex: 1,
+    // Color aplicado dinámicamente en el JSX
   },
 
   idText: {
     ...FONT.caption,
-    color: PALETTE.textMuted,
+    // Color aplicado dinámicamente en el JSX
   },
 
   metricsGrid: {
@@ -265,47 +306,41 @@ const styles = StyleSheet.create({
 
   metricCard: {
     flex: 1,
-    backgroundColor: PALETTE.graphite,
     padding: SPACING.lg,
     borderRadius: RADIUS.cards,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+    // BackgroundColor y borderColor aplicados dinámicamente
   },
 
   highlightMetricCard: {
-    backgroundColor: 'rgba(212, 175, 55, 0.05)',
-    borderColor: PALETTE.mutedGold,
+    backgroundColor: 'rgba(212, 175, 55, 0.05)', // Translúcido de acento estático
+    // BorderColor aplicado dinámicamente
   },
 
   metricLabel: {
     ...FONT.caption,
-    color: PALETTE.textSecondary,
     marginBottom: SPACING.xs,
+    // Color aplicado dinámicamente
   },
 
   metricValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: PALETTE.textPrimary,
-  },
-
-  highlightMetricValue: {
-    color: PALETTE.mutedGold,
+    // Color aplicado dinámicamente
   },
 
   timelineBlock: {
-    backgroundColor: PALETTE.carbonMist,
     borderRadius: RADIUS.cards,
     padding: SPACING.xl,
     borderWidth: 1,
-    borderColor: PALETTE.steelLine,
+    // BackgroundColor y borderColor aplicados dinámicamente
   },
 
   sectionTitle: {
     ...FONT.h3,
     fontSize: 16,
-    color: PALETTE.textPrimary,
     marginBottom: SPACING.xl,
+    // Color aplicado dinámicamente
   },
 
   timelineNode: {
@@ -325,20 +360,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginRight: SPACING.md,
     zIndex: 2,
-  },
-
-  nodeDotStart: {
-    backgroundColor: PALETTE.mutedGold,
-  },
-
-  nodeDotArrival: {
-    backgroundColor: PALETTE.successGreen,
-  },
-
-  nodeDotClose: {
-    backgroundColor: PALETTE.carbonMist,
-    borderColor: PALETTE.steelLine,
-    borderWidth: 1,
+    // BackgroundColor aplicado dinámicamente
   },
 
   nodeLine: {
@@ -347,19 +369,19 @@ const styles = StyleSheet.create({
     top: 18,
     bottom: -24,
     width: 2,
-    backgroundColor: PALETTE.steelLine,
     zIndex: 1,
+    // BackgroundColor aplicado dinámicamente
   },
 
   nodeTitle: {
     ...FONT.bodyStrong,
-    color: PALETTE.textPrimary,
+    // Color aplicado dinámicamente
   },
 
   nodeTime: {
     ...FONT.caption,
-    color: PALETTE.textSecondary,
     marginTop: 4,
+    // Color aplicado dinámicamente
   },
 
   bottomSpacer: {
@@ -375,8 +397,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
     padding: SPACING.xl,
     paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
-    backgroundColor: PALETTE.obsidian,
     borderTopWidth: 1,
-    borderTopColor: PALETTE.steelLine,
+    // BackgroundColor y borderTopColor aplicados dinámicamente
   },
 });

@@ -3,9 +3,16 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { PALETTE, FONT } from '../../src/constants/theme';
+
+// Importaciones adaptadas a la nueva arquitectura
+import { useTheme } from '../../src/context/ThemeContext';
+import { FONT } from '../../src/constants/theme';
+import { ICONS } from '../../src/constants/icons';
 
 export default function TabLayout() {
+  // Consumo dinámico del tema centralizado
+  const { colors } = useTheme();
+
   const handleTabPress = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -16,12 +23,12 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: PALETTE.mutedGold,
-        tabBarInactiveTintColor: PALETTE.textMuted,
+        tabBarActiveTintColor: colors.mutedGold,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: PALETTE.obsidian,
+          backgroundColor: colors.obsidian,
           borderTopWidth: 1,
-          borderTopColor: PALETTE.steelLine,
+          borderTopColor: colors.steelLine,
           height: Platform.OS === 'ios' ? 88 : 68,
           paddingBottom: Platform.OS === 'ios' ? 28 : 12,
           paddingTop: 12,
@@ -41,7 +48,11 @@ export default function TabLayout() {
           title: 'Hoy',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'grid' : 'grid-outline'}
+              name={
+                focused
+                  ? (ICONS.tabs.home.active as keyof typeof Ionicons.glyphMap)
+                  : (ICONS.tabs.home.inactive as keyof typeof Ionicons.glyphMap)
+              }
               size={24}
               color={color}
             />
@@ -56,7 +67,11 @@ export default function TabLayout() {
           title: 'Historial',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'time' : 'time-outline'}
+              name={
+                focused
+                  ? (ICONS.tabs.history.active as keyof typeof Ionicons.glyphMap)
+                  : (ICONS.tabs.history.inactive as keyof typeof Ionicons.glyphMap)
+              }
               size={24}
               color={color}
             />
@@ -71,7 +86,11 @@ export default function TabLayout() {
           title: 'Reportes',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'document-text' : 'document-text-outline'}
+              name={
+                focused
+                  ? (ICONS.tabs.report.active as keyof typeof Ionicons.glyphMap)
+                  : (ICONS.tabs.report.inactive as keyof typeof Ionicons.glyphMap)
+              }
               size={24}
               color={color}
             />
@@ -86,7 +105,11 @@ export default function TabLayout() {
           title: 'Ajustes',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'settings' : 'settings-outline'}
+              name={
+                focused
+                  ? (ICONS.tabs.settings.active as keyof typeof Ionicons.glyphMap)
+                  : (ICONS.tabs.settings.inactive as keyof typeof Ionicons.glyphMap)
+              }
               size={24}
               color={color}
             />
